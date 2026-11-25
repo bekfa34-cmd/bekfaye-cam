@@ -25,20 +25,22 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font:15px/1.
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
 button:disabled{opacity:.35}
 button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+button[data-armed]{background:var(--rec)!important;color:#fff!important}
 [hidden]{display:none!important}
-.mono{font-family:ui-monospace,"SF Mono",Menlo,monospace}
 /* the camera <video> must stay "visible" or WebKit may stop decoding it */
 #vid{position:fixed;left:0;top:0;width:2px;height:2px;opacity:.01;pointer-events:none}
 
 #app{position:relative;height:100%;height:100dvh;display:flex;flex-direction:column}
 #top{display:flex;align-items:center;justify-content:space-between;gap:8px;
   padding:calc(env(safe-area-inset-top) + 6px) max(12px,env(safe-area-inset-right)) 6px max(12px,env(safe-area-inset-left))}
-.pill{display:flex;align-items:center;gap:7px;background:var(--chip);border-radius:99px;padding:7px 12px;font-size:13px;font-weight:700}
+.pill{display:flex;align-items:center;gap:7px;background:var(--chip);border-radius:99px;padding:0 14px;min-height:38px;font-size:13px;font-weight:700}
+.pill.pulse{animation:pulse .4s}
+@keyframes pulse{50%{background:var(--ok);color:#000}}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--dim)}
 .dot.ok{background:var(--ok)}.dot.bad{background:var(--rec)}
 #meter{width:30px;height:4px;border-radius:2px;background:rgba(255,255,255,.15);overflow:hidden}
 #meter i{display:block;height:100%;width:0;background:var(--ok)}
-#maskBadge{background:var(--mosh);color:#140c06}
+#clipBtn.on{background:var(--rec);color:#fff}
 
 #view{position:relative;flex:1;min-height:0;touch-action:none;background:#000;overflow:hidden}
 #view canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;display:block;pointer-events:none}
@@ -51,50 +53,60 @@ button:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
 #flash{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .3s}
 #flash.on{opacity:.8;transition:none}
 #cmp{position:absolute;top:10px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.65);padding:5px 10px;border-radius:8px;font:800 11px ui-monospace,Menlo,monospace;letter-spacing:.14em}
-#zoom{display:flex;gap:2px;background:var(--chip);border-radius:99px;padding:3px}
-#zoom button{min-width:34px;height:30px;border-radius:99px;font:700 12px ui-monospace,Menlo,monospace}
-#zoom button.on{background:var(--fg);color:#000}
 #count{position:absolute;inset:0;display:grid;place-items:center;font:800 120px ui-monospace,Menlo,monospace;text-shadow:0 4px 30px rgba(0,0,0,.7);pointer-events:none}
-#mtools{position:absolute;top:8px;right:max(8px,env(safe-area-inset-right));display:flex;flex-direction:column;gap:4px;align-items:stretch}
-#mtools button{width:62px;padding:8px 0;border-radius:10px;background:rgba(12,11,13,.72);font-size:11px;font-weight:800;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
-#mtools button.on{background:var(--mosh);color:#140c06}
-#mtList{display:flex;flex-direction:column;gap:4px}
-#mslide{position:absolute;top:8px;left:max(8px,env(safe-area-inset-left));right:80px;display:flex;flex-direction:column;gap:6px;background:rgba(12,11,13,.72);
-  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:12px;padding:8px 10px}
-.srow{display:flex;align-items:center;gap:8px}
-.srow .lbl{width:64px}
+/* Mosh tools: a drawer at the bottom of the picture (thumb reach), closed by default */
+#mdrawer{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;gap:6px;background:rgba(12,11,13,.84);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);padding:8px max(8px,env(safe-area-inset-left)) 8px max(8px,env(safe-area-inset-right));border-top:1px solid var(--line)}
+.drow{display:flex;gap:6px;align-items:center}
+.drow.scroll{overflow-x:auto;scrollbar-width:none;-webkit-mask-image:linear-gradient(to right,#000 85%,transparent);mask-image:linear-gradient(to right,#000 85%,transparent);padding-right:24px}
+.drow.scroll::-webkit-scrollbar{display:none}
+#mdrawer button{flex:none;min-height:40px;padding:0 12px;border-radius:10px;background:var(--chip);font-size:12px;font-weight:800;white-space:nowrap}
+#mdrawer button.on{background:var(--mosh);color:#140c06}
+#toolSeg button{flex:1;padding:0 4px}
+.srow{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+#sliders{flex-wrap:wrap;row-gap:4px}
+#recipes small{color:var(--dim);font-size:11px;margin-left:auto}
+#recipes button{width:44px;padding:0}
+#recipes button.has{border:2px solid var(--mosh)}
 
-#panel{background:var(--panel);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:7px;
+#panel{background:var(--panel);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:6px;
   padding:7px max(12px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(12px,env(safe-area-inset-left))}
 #caption{font-size:12px;color:var(--dim);line-height:1.35;min-height:2.7em}
 #caption b{color:var(--fg)}
 .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 28px 2px 0;
   -webkit-mask-image:linear-gradient(to right,#000 82%,transparent);mask-image:linear-gradient(to right,#000 82%,transparent)}
 .chips::-webkit-scrollbar{display:none}
-.chips button{flex:none;padding:8px 13px;border-radius:99px;background:var(--chip);font-size:13px;font-weight:700}
+.chips button{flex:none;min-height:40px;padding:0 14px;border-radius:99px;background:var(--chip);font-size:13px;font-weight:700}
 .chips button.on{background:var(--acc);color:#140c06}
-.tune{display:flex;align-items:center;gap:8px}
+.tune{display:flex;align-items:center;gap:6px}
 .lbl{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);font-weight:800}
-input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
-.mini{padding:8px 11px;border-radius:10px;background:var(--chip);font-size:12px;font-weight:800;white-space:nowrap}
+input[type=range]{flex:1;min-width:60px;accent-color:var(--acc);height:32px}
+.mini{min-height:40px;padding:0 11px;border-radius:10px;background:var(--chip);font-size:12px;font-weight:800;white-space:nowrap}
 .mini.on{background:var(--acc);color:#140c06}
 #holdBtn.on{background:var(--rec);color:#fff}
-#pvrow{display:flex;justify-content:space-between;min-height:36px;align-items:center;gap:8px}
-#pv{display:flex;gap:16px;margin-right:4px}
-#pv button{font:800 12px ui-monospace,Menlo,monospace;letter-spacing:.16em;color:var(--dim);padding:6px 2px}
-#pv button.on{color:var(--acc)}
+#pvrow{display:flex;justify-content:space-between;min-height:42px;align-items:center;gap:8px}
+#zoom{display:flex;gap:2px;background:var(--chip);border-radius:99px;padding:2px;align-items:center}
+#zoom button{min-width:40px;height:38px;border-radius:99px;font:700 12px ui-monospace,Menlo,monospace}
+#zoom button.on{background:var(--fg);color:#000}
+#zv{font:800 12px ui-monospace,Menlo,monospace;color:var(--acc);padding:0 6px}
+#pv{display:flex;gap:4px}
+#pv button{font:800 12px ui-monospace,Menlo,monospace;letter-spacing:.14em;color:var(--dim);min-height:40px;padding:0 9px;border-radius:10px}
+#pv button.on{color:#140c06;background:var(--acc)}
 #recBig{font:800 18px ui-monospace,Menlo,monospace;color:var(--rec)}
 .ctl{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
-#thumb{justify-self:start;width:50px;height:50px;border-radius:11px;background:var(--chip) center/cover no-repeat;border:2px solid rgba(255,255,255,.3);position:relative}
+#thumb{justify-self:start;width:52px;height:52px;border-radius:11px;background:var(--chip) center/cover no-repeat;border:2px solid rgba(255,255,255,.3);position:relative}
 #thumb span{position:absolute;right:-6px;top:-6px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:var(--fg);color:#000;font-size:11px;font-weight:800;line-height:20px}
-#shutter{width:74px;height:74px;border-radius:50%;border:4px solid var(--fg);display:grid;place-items:center}
+#thumb.pop{animation:pop .35s}
+@keyframes pop{40%{transform:scale(1.18)}}
+#shutter{position:relative;width:74px;height:74px;border-radius:50%;border:4px solid var(--fg);display:grid;place-items:center}
 #shutter i{width:58px;height:58px;border-radius:50%;background:var(--fg);transition:all .15s}
 #shutter.vid i{background:var(--rec)}
 #shutter.rec i{width:28px;height:28px;border-radius:7px;background:var(--rec)}
-#flip{justify-self:end;width:50px;height:50px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-size:9px;font-weight:800;letter-spacing:.08em;line-height:1}
+#tbadge{position:absolute;right:-12px;top:-6px;background:var(--acc);color:#140c06;font-size:10px;font-weight:800;border-radius:8px;padding:2px 5px}
+#flip{justify-self:end;width:52px;height:52px;border-radius:50%;background:var(--chip);display:grid;place-items:center;font-size:9px;font-weight:800;letter-spacing:.08em;line-height:1}
 #flip b{font-size:20px;display:block;margin-bottom:2px}
 #tabs{display:grid;grid-template-columns:1fr 1fr 1fr 52px;gap:6px;padding:0 0 8px}
-#tabs button{padding:12px 0;border-radius:12px;font:800 13px ui-monospace,Menlo,monospace;letter-spacing:.16em;color:var(--dim);background:rgba(255,255,255,.05)}
+#tabs button{min-height:44px;border-radius:12px;font:800 13px ui-monospace,Menlo,monospace;letter-spacing:.16em;color:var(--dim);background:rgba(255,255,255,.05)}
 #tabs button.on{color:#140c06;background:var(--acc)}
 #gear{font-size:18px!important;letter-spacing:0!important}
 
@@ -105,31 +117,35 @@ input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
 #start p{margin:0;color:var(--dim);max-width:30ch}
 .tags{display:flex;gap:6px}
 .tags b{font:800 11px ui-monospace,Menlo,monospace;letter-spacing:.14em;padding:5px 9px;border-radius:8px;color:#140c06}
-.btn{border-radius:14px;background:var(--acc);color:#140c06;font-weight:800;font-size:16px;padding:13px 22px}
+.btn{min-height:46px;border-radius:14px;background:var(--acc);color:#140c06;font-weight:800;font-size:16px;padding:0 20px}
 .btn.ghost{background:#2a262c;color:var(--fg)}
 #err{color:var(--rec);max-width:34ch;min-height:1.3em;font-size:14px}
 
 #sheet{background:rgba(0,0,0,.55);display:flex;align-items:flex-end;z-index:12}
 .sheet-in{position:relative;width:100%;max-height:82%;overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--panel);border-radius:18px 18px 0 0;
   padding:0 max(16px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 18px) max(16px,env(safe-area-inset-left));-webkit-user-select:auto;user-select:auto}
-.bar{position:sticky;top:0;z-index:1;background:inherit;display:flex;justify-content:space-between;align-items:center;padding:10px 0}
+.bar{position:sticky;top:0;z-index:1;background:inherit;display:flex;justify-content:space-between;align-items:center;padding:6px 0}
 .bar b{font-size:17px}
-.link{font-weight:800;color:var(--acc);font-size:16px;padding:10px 4px;min-width:64px}
+.link{font-weight:800;color:var(--acc);font-size:16px;min-height:44px;padding:0 6px;min-width:64px}
 .sheet-in h3{margin:18px 0 4px;font:800 12px ui-monospace,Menlo,monospace;letter-spacing:.16em}
 #set-vhs h3{color:var(--vhs)}#set-west h3{color:var(--west)}#set-mosh h3{color:var(--mosh)}
 .r{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px}
 .r small{display:block;color:var(--dim);font-size:12px;margin-top:2px}
-.r select,.r input[type=date],.r input[type=time]{background:var(--chip);color:var(--fg);border:0;border-radius:8px;padding:6px 8px;font:inherit;font-size:16px;max-width:55%}
-.r input[type=checkbox]{width:22px;height:22px;accent-color:var(--acc);flex:none}
+.r select,.r input[type=date],.r input[type=time]{background:var(--chip);color:var(--fg);border:0;border-radius:8px;padding:8px;font:inherit;font-size:16px;max-width:55%}
+.r input[type=checkbox]{width:24px;height:24px;accent-color:var(--acc);flex:none}
 .r input[type=range]{max-width:50%}
 .note{color:var(--dim);font-size:12px;margin:10px 0 0;line-height:1.4}
 
 #roll{display:flex;flex-direction:column;padding:calc(env(safe-area-inset-top) + 4px) max(14px,env(safe-area-inset-right)) calc(env(safe-area-inset-bottom) + 12px) max(14px,env(safe-area-inset-left))}
 #rollGrid{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;align-content:start;margin-top:10px}
 #rollGrid button{position:relative;aspect-ratio:1;max-width:100%;background:#222 center/cover no-repeat;border-radius:6px}
+#rollGrid button.sel{outline:3px solid var(--acc);outline-offset:-3px}
 #rollGrid i{position:absolute;left:5px;bottom:4px;font:800 11px ui-monospace,Menlo,monospace;font-style:normal;text-shadow:0 1px 3px #000}
 #rollGrid em{position:absolute;right:5px;top:3px;font-style:normal;font-weight:800;color:var(--ok);text-shadow:0 1px 3px #000}
-.rollFoot{display:flex;justify-content:center;padding-top:10px}
+#rollGrid u{position:absolute;left:5px;top:5px;width:22px;height:22px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.35)}
+#rollGrid .sel u{background:var(--acc)}
+#rollEmpty{color:var(--dim);text-align:center;margin-top:30vh}
+.rollFoot{display:flex;justify-content:center;gap:8px;padding-top:10px}
 #result{display:grid;grid-template-rows:1fr auto auto;gap:10px;padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 14px);z-index:11}
 #result .media{min-height:0;display:grid;place-items:center}
 #result .media>*{max-width:100%;max-height:100%;border-radius:12px}
@@ -142,20 +158,21 @@ input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
 @media (orientation:landscape) and (max-height:560px){
   #app{flex-direction:row}
   #top{position:absolute;z-index:4;left:0;top:0;padding-left:max(12px,env(safe-area-inset-left))}
-  #panel{width:min(330px,44vw);flex:none;overflow-y:auto;border-top:0;border-left:1px solid var(--line);
+  #panel{width:min(340px,46vw);flex:none;overflow-y:auto;border-top:0;border-left:1px solid var(--line);
     padding:max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) 12px}
   #caption{min-height:0}
 }
-@media (prefers-reduced-motion:reduce){#shutter i,#flash{transition:none}}
+@media (prefers-reduced-motion:reduce){#shutter i,#flash{transition:none}#thumb.pop,.pill.pulse{animation:none}}
 </style>
 </head>
 <body>
 <video id="vid" playsinline muted autoplay></video>
+<input type="file" id="clipIn" accept="video/*" hidden>
 
 <div id="app">
   <header id="top">
-    <button id="mic" class="pill" aria-label="Microphone status, tap to reconnect"><span class="dot" id="micDot"></span><span id="micTxt">MIC</span><span id="meter"><i></i></span></button>
-    <button id="maskBadge" class="pill" hidden>MASK ON</button>
+    <button id="mic" class="pill" aria-label="Microphone status, tap to check or reconnect"><span class="dot" id="micDot"></span><span id="micTxt">MIC</span><span id="meter"><i></i></span></button>
+    <button id="clipBtn" class="pill" aria-label="Use a video from Photos instead of the camera">＋ Clip</button>
   </header>
 
   <main id="view">
@@ -164,19 +181,17 @@ input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
     <canvas id="guide" hidden></canvas>
     <div id="pic"><div id="grid" hidden></div><div id="flash"></div></div>
     <div id="cmp" hidden>ORIGINAL</div>
-    <div id="mslide" hidden>
-      <label class="srow" id="rowSize"><span class="lbl">Size</span><input type="range" id="bsize" min="0.02" max="0.25" step="0.005" value="0.08"></label>
-      <label class="srow" id="rowFeather"><span class="lbl">Soft edge</span><input type="range" id="feather" min="0" max="0.05" step="0.001"></label>
-      <label class="srow" id="rowKey"><span class="lbl">Key level</span><input type="range" id="kthr" min="0.05" max="0.95" step="0.01" value="0.6"></label>
-    </div>
-    <div id="mtools" hidden>
-      <button id="mtToggle">Tools ▴</button>
-      <div id="mtList">
-        <button data-tool="tap" class="on">Tap</button><button data-tool="brush">Brush</button><button data-tool="erase">Erase</button><button data-tool="lasso">Lasso</button>
-        <button id="mUndo">Undo</button><button id="mClear">Clear</button><button id="mInv">Invert</button><button id="mKey">Key: Off</button><button id="mBeat">Beat</button>
-      </div>
-    </div>
     <div id="count" hidden></div>
+    <div id="mdrawer" hidden>
+      <div class="drow" id="toolSeg"><button data-tool="tap" class="on" id="tapTool">Tap</button><button data-tool="brush">Brush</button><button data-tool="erase">Erase</button><button data-tool="lasso">Lasso</button><button id="mUndo">Undo</button></div>
+      <div class="drow scroll"><button id="mShow">Show mask</button><button id="mInv">Invert</button><button id="mKey">Key: Off</button><button id="mBeat">Beat</button><button id="mFinish">Finish: None</button><button id="mClear">Clear mask</button><button id="mReset">Reset all</button></div>
+      <div class="drow" id="sliders">
+        <label class="srow" id="rowSize"><span class="lbl">Size</span><input type="range" id="bsize" min="0.02" max="0.25" step="0.005" value="0.08"></label>
+        <label class="srow" id="rowFeather"><span class="lbl">Soft</span><input type="range" id="feather" min="0" max="0.05" step="0.001"></label>
+        <label class="srow" id="rowKey"><span class="lbl">Key</span><input type="range" id="kthr" min="0.05" max="0.95" step="0.01" value="0.6"></label>
+      </div>
+      <div class="drow" id="recipes"><span class="lbl">Saved</span><button data-r="0">1</button><button data-r="1">2</button><button data-r="2">3</button><small>tap = load · hold = save</small></div>
+    </div>
   </main>
 
   <section id="panel">
@@ -184,12 +199,12 @@ input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
     <div id="chips" class="chips"></div>
     <div class="tune" id="tuneVHS"><span class="lbl">Wear</span><input type="range" id="wear" min="0" max="1" step="0.01" aria-label="Tape wear"><button class="mini" id="stampBtn">Stamp</button></div>
     <div class="tune" id="tuneWest" hidden><span class="lbl">Strength</span><input type="range" id="str" min="0" max="1" step="0.01" aria-label="Filter strength"><button class="mini" id="gridBtn">Grid</button></div>
-    <div class="tune" id="tuneMosh" hidden><span class="lbl">Amount</span><input type="range" id="amt" min="0" max="1" step="0.01" value="0.6" aria-label="Mosh amount">
-      <button class="mini" id="holdBtn">■ Hold</button><button class="mini" id="clean">↺ Clean</button></div>
-    <div id="pvrow"><div id="zoom" aria-label="Zoom (or pinch the picture)"></div><div id="pv"><button data-v="0" class="on">PHOTO</button><button data-v="1">VIDEO</button></div><div id="recBig" hidden>● 0:00</div></div>
+    <div class="tune" id="tuneMosh" hidden><input type="range" id="amt" min="0" max="1" step="0.01" value="0.6" aria-label="Mosh amount">
+      <button class="mini" id="holdBtn">■ Freeze</button><button class="mini" id="clean">↺ New</button><button class="mini" id="toolsBtn">Tools</button></div>
+    <div id="pvrow"><div id="zoom" aria-label="Zoom (or pinch the picture)"><span id="zv" hidden></span></div><div id="pv"><button data-v="0" class="on">PHOTO</button><button data-v="1">VIDEO</button></div><div id="recBig" hidden>● 0:00</div></div>
     <div class="ctl">
       <button id="thumb" aria-label="Open roll"><span hidden>0</span></button>
-      <button id="shutter" aria-label="Shutter"><i></i></button>
+      <button id="shutter" aria-label="Shutter"><i></i><b id="tbadge" hidden></b></button>
       <button id="flip" aria-label="Switch front and back camera"><b>⇄</b>FLIP</button>
     </div>
     <nav id="tabs"><button data-t="VHS" class="on">VHS</button><button data-t="West">WEST</button><button data-t="Mosh">MOSH</button><button id="gear" aria-label="Settings">⚙︎</button></nav>
@@ -202,6 +217,7 @@ input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
   <div class="tags"><b style="background:var(--vhs)">VHS</b><b style="background:var(--west)">WEST</b><b style="background:var(--mosh)">MOSH</b></div>
   <button class="btn" id="go" style="background:var(--vhs)">Start camera</button>
   <div id="err"></div>
+  <small class="ver" style="color:var(--dim)"></small>
 </div>
 
 <div id="sheet" class="over" hidden>
@@ -215,8 +231,9 @@ input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
       <label class="r">Grid lines<input type="checkbox" id="s-grid"></label>
     </section>
     <section id="set-vhs"><h3>VHS</h3>
-      <label class="r">Aspect ratio<select id="s-vhsAspect"><option value="4:3">4:3 (tape)</option><option value="16:9">16:9</option><option value="full">Full screen</option></select></label>
-      <label class="r">Top label<select id="s-topLabel"><option value="none">None</option><option value="play">PLAY ► SP</option><option value="rec">STBY / ● REC + counter</option></select></label>
+      <label class="r">Aspect ratio<select id="s-vhsAspect"><option value="4:3">4:3 (tape)</option><option value="16:9">16:9 / 9:16</option><option value="4:5">4:5 (Instagram)</option><option value="full">Full screen</option></select></label>
+      <label class="r"><span>Tape speed<small>SP is cleanest; LP and EP wear the tape more.</small></span><select id="s-speed"><option value="SP">SP</option><option value="LP">LP</option><option value="EP">EP</option></select></label>
+      <label class="r">Top label<select id="s-topLabel"><option value="none">None</option><option value="play">PLAY ► + speed</option><option value="rec">STBY / ● REC + counter</option></select></label>
       <label class="r">Date stamp<select id="s-stamp"><option value="none">No stamp</option><option value="classic">Classic camcorder</option><option value="tall">Tall</option><option value="digital">Orange digital</option></select></label>
       <label class="r">Show date<input type="checkbox" id="s-showDate"></label>
       <label class="r">Show time<input type="checkbox" id="s-showTime"></label>
@@ -234,21 +251,24 @@ input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
       <label class="r"><span>Tape sound<small>Muffled, warbly VHS audio with hiss. Off = clean mic.</small></span><input type="checkbox" id="s-tapeSound"></label>
     </section>
     <section id="set-west"><h3>WEST</h3>
-      <label class="r">Aspect ratio<select id="s-westAspect"><option value="full">Full</option><option value="4:3">4:3</option><option value="1:1">1:1</option></select></label>
+      <label class="r">Aspect ratio<select id="s-westAspect"><option value="full">Full</option><option value="4:3">4:3</option><option value="4:5">4:5 (Instagram)</option><option value="1:1">1:1</option><option value="16:9">16:9 / 9:16</option></select></label>
     </section>
     <section id="set-mosh"><h3>MOSH</h3>
-      <label class="r"><span>Auto clean frame<small>How often the picture snaps back to clean.</small></span><select id="s-refresh"><option value="auto">By amount</option><option value="off">Never (pure mosh)</option><option value="slow">Every 8 s</option><option value="fast">Every 2 s</option></select></label>
-      <label class="r"><span>Beat sensitivity<small>With Beat on, how loud a sound triggers a clean frame.</small></span><input type="range" id="s-beatSens" min="0.05" max="1" step="0.01"></label>
+      <label class="r">Aspect ratio<select id="s-moshAspect"><option value="full">Full</option><option value="4:5">4:5 (Instagram)</option><option value="16:9">16:9 / 9:16</option><option value="1:1">1:1</option><option value="4:3">4:3</option></select></label>
+      <label class="r"><span>Auto new frame<small>How often the picture snaps back to clean. Never happens while recording.</small></span><select id="s-refresh"><option value="auto">By amount</option><option value="off">Never (pure mosh)</option><option value="slow">Every 8 s</option><option value="fast">Every 2 s</option></select></label>
+      <label class="r"><span>Beat sensitivity<small>With Beat on, how loud a sound triggers a mosh pulse.</small></span><input type="range" id="s-beatSens" min="0.05" max="1" step="0.01"></label>
     </section>
-    <p class="note">Settings stay on this phone.</p>
+    <p class="note">Settings stay on this phone. <span class="ver"></span></p>
+    <div style="height:55vh"></div>
   </div>
 </div>
 
 <div id="roll" class="over" hidden>
-  <div class="bar"><button id="rollDone" class="link" style="text-align:left">Done</button><b id="rollTitle">Roll</b><button id="rollSaveAll" class="link" style="text-align:right">Save all</button></div>
+  <div class="bar"><button id="rollDone" class="link" style="text-align:left">Done</button><b id="rollTitle">Roll</b><button id="rollSel" class="link" style="text-align:right">Select</button></div>
   <p class="note" style="margin:0">Shots stay here until you delete them. Save opens the share sheet: choose Save Image / Save Video to put them in Photos.</p>
   <div id="rollGrid"></div>
-  <div class="rollFoot"><button id="rollClear" class="btn ghost">Clear roll</button></div>
+  <p id="rollEmpty" hidden>No shots yet. Take one with the big round button.</p>
+  <div class="rollFoot"><button id="rollSave" class="btn" style="background:var(--fg)">Save all</button><button id="rollDel" class="btn ghost">Clear roll</button></div>
 </div>
 
 <div id="result" class="over" hidden>
@@ -259,7 +279,9 @@ input[type=range]{flex:1;min-width:80px;accent-color:var(--acc)}
 <div id="toast" hidden></div>
 
 <script>
+const VERSION='v2.1';   // bump on every release so the phone can show which build it has
 const $=id=>document.getElementById(id);
+document.querySelectorAll('.ver').forEach(e=>e.textContent='Bek. Faye '+VERSION);
 const out=$('out'),octx=out.getContext('2d'),vid=$('vid');
 const maskC=document.createElement('canvas'),mctx=maskC.getContext('2d');           // the real mask (uploaded to the GPU)
 const maskV=$('maskv'),mvctx=maskV.getContext('2d');                                   // what you see (shows Invert)
@@ -269,12 +291,15 @@ const agcC=document.createElement('canvas');agcC.width=agcC.height=16;const agcX
 
 // ---------- settings (kept in this browser only) ----------
 const DEF={quality:'1080',hiPhoto:true,timer:'0',preview:false,grid:false,
-  vhsAspect:'4:3',topLabel:'play',stamp:'classic',showDate:true,showTime:true,timeFmt:'12',dateFmt:'us',right:false,custom:false,cDate:'1998-11-24',cTime:'19:17',
-  wear:.5,shakeNoise:true,glitches:true,interlace:true,tapeSound:true,westAspect:'full',str:1,refresh:'auto',beatSens:.5,feather:.012,
-  tab:'VHS',selVHS:0,selWest:1,selMosh:0,video:false};
+  vhsAspect:'4:3',speed:'SP',topLabel:'play',stamp:'classic',stampStyle:'classic',showDate:true,showTime:true,timeFmt:'12',dateFmt:'us',right:false,
+  custom:false,cDate:'1998-11-24',cTime:'19:17',wear:.5,shakeNoise:true,glitches:true,interlace:true,tapeSound:true,
+  westAspect:'full',str:1,moshAspect:'full',moshFinish:'none',refresh:'auto',beatSens:.5,feather:.012,toolsOpen:false,recipes:[null,null,null],
+  tab:'VHS',selVHS:0,selWest:1,selMosh:0,video:false,knowsGestures:false};
 const S=Object.assign({},DEF);
 try{Object.assign(S,JSON.parse(localStorage.getItem('bekfaye.v1')||'{}'));}catch(e){}
-function save(){try{localStorage.setItem('bekfaye.v1',JSON.stringify(S));}catch(e){}}
+if(S.stamp!=='none')S.stampStyle=S.stamp;
+if(!Array.isArray(S.recipes))S.recipes=[null,null,null];
+function save(){try{localStorage.setItem('bekfaye.v1',JSON.stringify(S));}catch(e){toast('Could not save settings (storage full?).');}}
 
 // [label, shader id, what it does]
 const ITEMS={
@@ -285,16 +310,17 @@ const ITEMS={
     ['Threshold',12,'Two-tone poster.'],['Pixelate',13,'Big pixels.'],['Line',14,'Pen sketch with hatching.'],['Blue Ink',15,'Blue stipple print.'],['Red Pen',16,'Red pen on paper.']],
   Mosh:[['Smear',0,'Movement drags the old picture around (classic datamosh).'],['Bloom',1,'The picture swells out of the center point. Tap or drag on the picture to move it.'],
     ['Radial',2,'Pixels stream out of the center point. Tap or drag to move it.'],['Swirl',3,'The picture twists around the center point. Tap or drag to move it.'],
-    ['Drag',4,'Pixels streak one way. Swipe on the picture to set the direction.'],['Blocks',5,'Macroblocks freeze and jump.'],['Drip',6,'Bright pixels drip down.'],
+    ['Drag',4,'Pixels streak one way. Swipe on the picture to aim it.'],['Blocks',5,'Macroblocks freeze and jump.'],['Drip',6,'Bright pixels drip down.'],
     ['Melt',7,'Columns slide down.'],['Paint',8,'Moving oil-paint strokes.'],['Stutter',9,'Frames freeze and rows slip.'],['Ghost',10,'Echo trails behind movement.'],
     ['Split',11,'Red, green and blue drift apart.']]};
 const PIVOT_MODES=['Bloom','Radial','Swirl'],NO_FLOW=[5,6,9];
 const clampSel=(t,v)=>Math.min(ITEMS[t].length-1,Math.max(0,v|0));
 const sel={VHS:clampSel('VHS',S.selVHS),West:clampSel('West',S.selWest),Mosh:clampSel('Mosh',S.selMosh)};
-let tab=ITEMS[S.tab]?S.tab:'VHS',zoom=1,facing='environment',videoMode=!!S.video,recording=false,recStart=0,shake=0,started=false;
-let tool='tap',keyMode=0,inv=false,showMask=false,maskUse=false,maskDirty=true,pivot=[.5,.5],dragDir=[.004,0],holding=false,beatOn=false,toolsOpen=true;
-let compare=false,photoPending=false,customSetAt=Date.now(),agc=1,burst=0,burstStart=-1e9,nextBurst=0,lastBeat=0,prevLevel=0,level=0;
+let tab=ITEMS[S.tab]?S.tab:'VHS',zoom=1,facing='environment',videoMode=!!S.video,recording=false,recStart=0,shake=0,started=false,clipMode=false;
+let tool='tap',keyMode=0,inv=false,showMask=false,maskUse=false,maskDirty=true,pivot=[.5,.5],dragDir=[.004,0],holding=false,latched=false,beatOn=false,beatHoldUntil=0;
+let compare=false,photoPending=false,pendingShots=0,customSetAt=Date.now(),agc=1,burst=0,burstStart=-1e9,nextBurst=0,lastBeat=0,prevLevel=0,level=0;
 const curItem=()=>ITEMS[tab][sel[tab]];
+const SPEED_WEAR={SP:0,LP:.25,EP:.5};
 
 // ---------- shaders ----------
 const VS='attribute vec2 a;varying vec2 uv;void main(){uv=a*.5+.5;gl_Position=vec4(a,0.,1.);}';
@@ -304,7 +330,7 @@ float lum(vec3 c){return dot(c,vec3(.299,.587,.114));}`;
 // camera frames are uploaded without UNPACK_FLIP_Y (cheaper on iOS), so video lookups flip y here
 const VIDMAP=`vec2 vq(vec2 p){vec2 q=.5+(p-.5)*sc;if(mirror>.5)q.x=1.-q.x;if(flipv>.5)q.y=1.-q.y;return q;}`;
 
-// Looks pass: VHS (stamp baked in before the tape damage) and the West presets.
+// Looks pass: VHS (stamp baked in before the tape damage) and the West presets. Also the "finish" on top of a mosh.
 const AFS=COMMON+`
 uniform sampler2D t,tq,ts,tl;uniform vec2 res,sc;
 uniform float time,shake,mode,mirror,vp,stampOn,wear,str,flipv,agc,burst,ilace,field;
@@ -326,7 +352,7 @@ vec3 vhs(){
   float w=wear*(1.+old*.6+lo*1.2);
   float fr=floor(time*30.),ln=floor(uv.y*res.y/2.);
   vec2 p=uv;
-  p.x+=(h(vec2(ln,fr))-.5)*(.0006+.0025*w+.02*s);                    // line jitter
+  p.x+=(h(vec2(ln,fr))-.5)*(.0006+.0025*w+.02*s);                    // line jitter (moves the stamp too)
   p.x+=sin(p.y*7.+time*1.7)*.0009*(.5+w*2.);                          // tape stretch wobble
   float by=fract(-time*.06);
   float bm=smoothstep(.05,0.,abs(uv.y-by))*(w*.8+s*2.+burst*2.);      // rolling tracking band
@@ -335,8 +361,8 @@ vec3 vhs(){
   p.y+=(h(vec2(fr,7.))-.5)*.012*s;
   if(uv.y<.035)p.x+=(1.-uv.y/.035)*(.02+h(vec2(fr,floor(uv.y*150.)))*.05); // head-switching
   float fl=mod(floor(uv.y*res.y*.5)+field,2.);                        // interlaced field
-  // VHS bandwidth: sharp-ish luma with edge-enhancement halo, chroma smeared to the right
-  float u=(1.+lo*1.6)/640.,y0=0.,yw=0.;vec2 ch=vec2(0.);
+  // VHS bandwidth (~240 lines): soft luma with edge-enhancement halo, chroma smeared to the right
+  float u=(1.+lo*1.6)/480.,y0=0.,yw=0.;vec2 ch=vec2(0.);
   for(int k=-2;k<=5;k++){
     vec2 pk=p+vec2(float(k)*u,0.);
     vec3 sv=vid(pk);
@@ -356,7 +382,8 @@ vec3 vhs(){
   if(old>.5){c=sat(c,.8)*vec3(1.03,.94,1.02)+vec3(.05,.02,.06);c=(c-.5)*.85+.5;}
   if(lo>.5)c=floor(c*10.+.5)/10.;
   c=mix(c,smoothstep(0.,1.,c),.35);
-  c+=grain(uv)*(.05+.05*w+.25*s)+burst*(h(uv*res+time)-.5)*.45;
+  float tn=h(floor(uv*res/vec2(5.,1.5))+fract(time*7.)*311.)-.5;    // tape noise: streaky, not per-pixel
+  c+=tn*(.06+.06*w+.25*s)+burst*(h(uv*res+time)-.5)*.45;
   c+=bm*(.05+(h(uv*res+time)-.5)*.25);
   float dr=step(.9975-.004*w-.01*s,h(vec2(ln,fr*1.3))),x0=h(vec2(fr,ln)); // dropouts
   c=mix(c,vec3(1.),dr*step(x0,uv.x)*step(uv.x,x0+.12)*.8);
@@ -394,7 +421,7 @@ vec3 west(int m){
 }
 void main(){int m=int(mode+.5);vec3 c;if(m==0)c=vhs();else if(m==1)c=vid(uv);else c=west(m);gl_FragColor=vec4(clamp(c,0.,1.),1.);}`;
 
-// Motion pre-pass: one Lucas-Kanade estimate per 16x16 block, written to a tiny texture (was ~54 fetches per pixel).
+// Motion pre-pass: one Lucas-Kanade estimate per 16x16 block, written to a tiny texture.
 const FFS=COMMON+`
 uniform sampler2D tc,tp;uniform vec2 res,sc;uniform float mirror;varying vec2 uv;
 const float flipv=1.;
@@ -414,7 +441,7 @@ void main(){
   gl_FragColor=vec4(clamp(v/36.+.5,0.,1.),0.,1.);
 }`;
 
-// Datamosh pass: feedback buffer moved by block motion, limited by mask / luma key, frozen while Hold is pressed.
+// Datamosh pass: feedback buffer moved by block motion, limited by mask / key, frozen while Freeze is on.
 const MFS=COMMON+`
 uniform sampler2D tc,tf,tm,tv;uniform vec2 res,sc,pv,dd;
 uniform float time,amt,mode,reset,mirror,maskUse,key,thr,inv,feather,hold;
@@ -433,7 +460,7 @@ void main(){
   float B=16.;vec2 bc=(floor(uv*res/B)+.5)*B/res;
   vec2 v=(texture2D(tv,uv).rg-.5)*36./res;
   float mag=length(v*res),k=amt,ar=res.x/res.y,rf=smoothstep(.6,4.,mag)*(1.-k*.6);
-  vec3 nw=hold>.5?F(uv-v):cur;                         // while held, no fresh picture gets in
+  vec3 nw=hold>.5?F(uv-v):cur;                         // while frozen, no fresh picture gets in
   int m=int(mode+.5);vec3 o;
   if(m==0)o=mix(F(uv-v),nw,mix(.12,.004,k));                                                // Smear
   else if(m==1){vec2 q=pv+(uv-pv)*(1.-.008*(.4+k));                                          // Bloom from pivot
@@ -464,7 +491,8 @@ void main(){
     o=vec3(mix(F(uv-v*1.6).r,nw.r,r),mix(F(uv-v).g,nw.g,r),mix(F(uv+v*.6).b,nw.b,r));}
   float mk=maskUse>.5?maskA():1.,l=lum(cur),kw=.07+feather*2.;
   if(key>.5&&key<1.5)mk*=smoothstep(thr-kw,thr+kw,l);          // Sky: bright areas only
-  else if(key>1.5)mk*=1.-smoothstep(thr-kw,thr+kw,l);          // Dark areas only
+  else if(key>1.5&&key<2.5)mk*=1.-smoothstep(thr-kw,thr+kw,l); // Dark areas only
+  else if(key>2.5)mk*=smoothstep(.4+thr*2.,1.2+thr*4.,mag);    // Motion: only things that move
   if(inv>.5)mk=1.-mk;
   gl_FragColor=vec4(mix(cur,o,mk),1.);
 }`;
@@ -519,12 +547,10 @@ function allocFB(w,h){
 }
 
 // Output size: crop the camera to the tab's aspect, cap the long side. Frozen while recording so the file never changes size.
+function aspectRatio(asp,port,vw,vh){return asp==='4:3'?(port?3/4:4/3):asp==='16:9'?(port?9/16:16/9):asp==='4:5'?(port?4/5:5/4):asp==='1:1'?1:vw/vh;}
 function layout(cap){
   const vw=vid.videoWidth,vh=vid.videoHeight,port=vh>vw,locked=recording&&dims.w;
-  let R;
-  if(locked)R=dims.w/dims.h;
-  else{const asp=tab==='VHS'?S.vhsAspect:tab==='West'?S.westAspect:'full';
-    R=asp==='4:3'?(port?3/4:4/3):asp==='16:9'?(port?9/16:16/9):asp==='1:1'?1:vw/vh;}
+  const R=locked?dims.w/dims.h:aspectRatio(tab==='VHS'?S.vhsAspect:tab==='West'?S.westAspect:S.moshAspect,port,vw,vh);
   let cw=1,ch=1;if(vw/vh>R)cw=R*vh/vw;else ch=vw/(R*vh);
   scv=[cw/zoom,ch/zoom];
   if(locked)return;
@@ -534,12 +560,19 @@ function layout(cap){
 }
 let undoStack=[];
 function resizeAll(w,h){
+  dims={w,h};out.width=gl.width=w;out.height=gl.height=h;g.viewport(0,0,w,h);allocFB(w,h);
+  for(const c of [guideC,stampC]){c.width=w>>1;c.height=h>>1;}
+  if(tab==='Mosh')fitMask();
+  stampKey='';needReset=true;drawGuide();drawMaskView();placePic();
+}
+// the mask lives in picture space; only touch it when the Mosh picture itself changes size (not for a VHS/West photo)
+function fitMask(){
+  const w=dims.w>>1,h=dims.h>>1;if(!w||(maskC.width===w&&maskC.height===h))return;
   let keep=null;
   if(maskUse&&maskC.width){keep=document.createElement('canvas');keep.width=maskC.width;keep.height=maskC.height;keep.getContext('2d').drawImage(maskC,0,0);}
-  dims={w,h};out.width=gl.width=w;out.height=gl.height=h;g.viewport(0,0,w,h);allocFB(w,h);
-  for(const c of [maskC,maskV,guideC,stampC]){c.width=w>>1;c.height=h>>1;}
-  if(keep)mctx.drawImage(keep,0,0,maskC.width,maskC.height);   // keep the drawn mask across size changes
-  undoStack=[];maskDirty=true;stampKey='';needReset=true;drawGuide();drawMaskView();placePic();
+  maskC.width=maskV.width=w;maskC.height=maskV.height=h;
+  if(keep)mctx.drawImage(keep,0,0,w,h);
+  undoStack=[];maskDirty=true;drawMaskView();
 }
 
 // ---------- VHS on-screen-display stamp (5x7 character generator, like real camcorders) ----------
@@ -573,7 +606,7 @@ function updateStamp(){
   const d=stampDate(),blink=performance.now()%1000<500,lines=[];
   if(S.stamp!=='none'){if(S.showTime)lines.push(timeStr(d));if(S.showDate)lines.push(dateStr(d));}
   let tl='',tr='';
-  if(S.topLabel==='play'){tl='PLAY ►';tr='SP';}
+  if(S.topLabel==='play'){tl='PLAY ►';tr=S.speed;}
   else if(S.topLabel==='rec'){const e=recording?Math.floor((performance.now()-recStart)/1000):0;
     tl=recording?'● REC':'STBY';tr=`${Math.floor(e/3600)}:${p2(Math.floor(e/60)%60)}:${p2(e%60)}`;}
   const key=[S.stamp,S.right,stampC.width,stampC.height,lines.join('|'),tl,tr,recording&&blink].join('#');
@@ -588,34 +621,37 @@ function updateStamp(){
   upCanvas(4,stampT,stampC);
 }
 
-// ---------- render: only when the camera delivers a new frame (30 fps), not at the 60/120 Hz screen rate ----------
-let newFrame=true,lastVT=-1,lastUi=0,lastMeter=0;
+// ---------- render: once per new camera frame (30 fps), with a watchdog if the frame callback stalls ----------
+let newFrame=true,lastVT=-1,lastRender=0,lastUi=0,lastMeter=0;
 const hasVFC='requestVideoFrameCallback' in HTMLVideoElement.prototype;
 if(hasVFC){const cb=()=>{newFrame=true;vid.requestVideoFrameCallback(cb);};vid.requestVideoFrameCallback(cb);}
 function frame(t){
   requestAnimationFrame(frame);
   uiTick(t);
   if(glErr||glLost||!vid.videoWidth||vid.readyState<2)return;
-  if(hasVFC){if(!newFrame&&!photoPending)return;newFrame=false;}
-  else{if(vid.currentTime===lastVT&&!photoPending)return;lastVT=vid.currentTime;}
+  const vt=vid.currentTime,stalled=t-lastRender>250&&vt!==lastVT;
+  if(hasVFC){if(!newFrame&&!photoPending&&!stalled)return;newFrame=false;}
+  else if(vt===lastVT&&!photoPending)return;
+  lastVT=vt;lastRender=t;
   render(t);
 }
 function render(t){
-  const mosh=tab==='Mosh',vhsOn=tab==='VHS',hi=photoPending&&!mosh&&S.hiPhoto;
+  const mosh=tab==='Mosh',vhsOn=tab==='VHS',fin=mosh?S.moshFinish:'none',vhsLook=vhsOn||fin==='vhs',hi=photoPending&&!mosh&&S.hiPhoto;
   layout(hi?4096:+S.quality);
-  const i=fn++&1,mir=facing==='user'?1:0,T=t/1000;
+  const i=fn++&1,mir=!clipMode&&facing==='user'?1:0,T=t/1000;
   upVideo(0,tin[i]);
   shake*=.93;
-  if(vhsOn)vhsTick(t);
+  if(vhsLook)vhsTick(t);
   let src=tin[i],flipv=1;
   if(mosh){
-    const amt=+$('amt').value,m=curItem()[1],iv={off:1e9,slow:8,fast:2,auto:3+22*amt}[S.refresh]||10;
-    if(holding)lastReset=t;else if(t-lastReset>iv*1000)needReset=true;
-    if(beatOn&&level>1.05-S.beatSens&&prevLevel<=1.05-S.beatSens&&t-lastBeat>180){needReset=true;lastBeat=t;}
+    const amt=+$('amt').value,m=curItem()[1],iv={off:1e9,slow:8,fast:2,auto:3+22*amt}[S.refresh]||10,frozen=holding||t<beatHoldUntil;
+    if(frozen||recording)lastReset=t;else if(t-lastReset>iv*1000)needReset=true;   // never auto-reset mid-take
+    if(beatOn&&level>1.05-S.beatSens&&prevLevel<=1.05-S.beatSens&&t-lastBeat>180){needReset=true;beatHoldUntil=t+300;lastBeat=t;}
     prevLevel=level;
+    fitMask();
     if(maskDirty){upCanvas(3,maskT,maskC);maskDirty=false;}
     bindUnit(1,tin[1-i]);
-    if(!NO_FLOW.includes(m)){
+    if(!NO_FLOW.includes(m)||keyMode===3){
       g.useProgram(FL.p);g.uniform2f(FL.u.res,dims.w,dims.h);g.uniform2f(FL.u.sc,scv[0],scv[1]);g.uniform1f(FL.u.mirror,mir);
       g.bindFramebuffer(g.FRAMEBUFFER,flowFbo);g.viewport(0,0,flowDims.w,flowDims.h);g.drawArrays(g.TRIANGLE_STRIP,0,4);
       g.bindFramebuffer(g.FRAMEBUFFER,null);g.viewport(0,0,dims.w,dims.h);
@@ -624,33 +660,36 @@ function render(t){
     g.uniform2f(u.res,dims.w,dims.h);g.uniform2f(u.sc,scv[0],scv[1]);g.uniform2f(u.pv,pivot[0],1-pivot[1]);g.uniform2f(u.dd,dragDir[0],dragDir[1]);
     g.uniform1f(u.time,T);g.uniform1f(u.amt,amt);g.uniform1f(u.mode,m);g.uniform1f(u.reset,needReset?1:0);g.uniform1f(u.mirror,mir);
     g.uniform1f(u.maskUse,maskUse?1:0);g.uniform1f(u.key,keyMode);g.uniform1f(u.thr,+$('kthr').value);g.uniform1f(u.inv,inv&&(maskUse||keyMode)?1:0);
-    g.uniform1f(u.feather,+S.feather);g.uniform1f(u.hold,holding&&!needReset?1:0);
+    g.uniform1f(u.feather,+S.feather);g.uniform1f(u.hold,frozen&&!needReset?1:0);
     g.bindFramebuffer(g.FRAMEBUFFER,fbo[1-fbi]);g.drawArrays(g.TRIANGLE_STRIP,0,4);g.bindFramebuffer(g.FRAMEBUFFER,null);
     fbi^=1;if(needReset){needReset=false;lastReset=t;}
     src=fbT[fbi];flipv=0;
   }
-  const stampOn=vhsOn&&!compare&&stampVisible();
+  const stampOn=vhsLook&&!compare&&stampVisible();
   if(stampOn)updateStamp();
   g.useProgram(A.p);const u=A.u;bindUnit(0,src);if(vhsOn)bindUnit(1,tin[1-i]);
   g.uniform2f(u.res,dims.w,dims.h);if(mosh)g.uniform2f(u.sc,1,1);else g.uniform2f(u.sc,scv[0],scv[1]);
-  g.uniform1f(u.time,T);g.uniform1f(u.shake,vhsOn&&S.shakeNoise?shake:0);
-  g.uniform1f(u.mode,compare||mosh?1:vhsOn?0:curItem()[1]);g.uniform1f(u.vp,vhsOn?curItem()[1]:0);
-  g.uniform1f(u.mirror,mosh?0:mir);g.uniform1f(u.flipv,flipv);g.uniform1f(u.stampOn,stampOn?1:0);g.uniform1f(u.wear,+S.wear);
-  g.uniform1f(u.str,tab==='West'?+S.str:1);g.uniform1f(u.agc,agc);g.uniform1f(u.burst,burst);g.uniform1f(u.ilace,S.interlace?1:0);g.uniform1f(u.field,fn&1);
+  g.uniform1f(u.time,T);g.uniform1f(u.shake,vhsLook&&S.shakeNoise?shake:0);
+  g.uniform1f(u.mode,compare?1:mosh?(fin==='vhs'?0:fin==='main'?2:1):vhsOn?0:curItem()[1]);
+  g.uniform1f(u.vp,vhsLook?ITEMS.VHS[sel.VHS][1]:0);
+  g.uniform1f(u.mirror,mosh?0:mir);g.uniform1f(u.flipv,flipv);g.uniform1f(u.stampOn,stampOn?1:0);g.uniform1f(u.wear,+S.wear+(SPEED_WEAR[S.speed]||0));
+  g.uniform1f(u.str,tab==='West'?+S.str:1);g.uniform1f(u.agc,agc);g.uniform1f(u.burst,burst);g.uniform1f(u.ilace,vhsOn&&S.interlace?1:0);g.uniform1f(u.field,fn&1);
   g.drawArrays(g.TRIANGLE_STRIP,0,4);
   octx.drawImage(gl,0,0);
   if(photoPending){photoPending=false;finishPhoto();}
 }
-// VHS extras: camcorder auto-gain, random tracking glitches, shake → warbly tape sound
+// VHS extras: camcorder auto-gain, random tracking glitches, shake → warbly tape sound (audio params updated ~10x/s)
+let lastAudioT=0,lastAudioK=-1;
 function vhsTick(t){
   if(fn%8===0){try{agcX.drawImage(vid,0,0,16,16);const d=agcX.getImageData(0,0,16,16).data;let s=0;for(let k=0;k<d.length;k+=4)s+=d[k]*.299+d[k+1]*.587+d[k+2]*.114;
     const avg=s/256/255,target=Math.min(1.45,Math.max(.75,.48/Math.max(avg,.05)));agc+=(target-agc)*.25;}catch(e){}}
-  if(S.glitches){if(!nextBurst)nextBurst=t+4000;
-    if(t>nextBurst){burstStart=t;nextBurst=t+(5000+Math.random()*15000)/(.4+ +S.wear);}}
+  const wear=+S.wear+(SPEED_WEAR[S.speed]||0);
+  if(S.glitches){if(!nextBurst)nextBurst=t+4000;if(t>nextBurst){burstStart=t;nextBurst=t+(5000+Math.random()*15000)/(.4+wear);}}
   if(S.shakeNoise&&shake>.7&&t-burstStart>600)burstStart=t;
   burst=t-burstStart<450?1-(t-burstStart)/450:0;
-  if(au&&actx&&S.tapeSound){const k=S.shakeNoise?Math.max(shake,burst*.6):0,now=actx.currentTime;
-    au.dl.delayTime.setTargetAtTime(.012+.008*k,now,.03);au.lp.frequency.setTargetAtTime(6500-4200*k,now,.05);}
+  if(au&&actx&&S.tapeSound&&t-lastAudioT>100){const k=S.shakeNoise?Math.max(shake,burst*.6):0;
+    if(Math.abs(k-lastAudioK)>.02){const now=actx.currentTime;au.dl.delayTime.setTargetAtTime(.012+.008*k,now,.03);au.lp.frequency.setTargetAtTime(6500-4200*k,now,.05);lastAudioK=k;}
+    lastAudioT=t;}
 }
 function uiTick(t){
   if(analyser&&t-lastMeter>66){lastMeter=t;analyser.getByteTimeDomainData(abuf);let m=0;for(const v of abuf)m=Math.max(m,Math.abs(v-128));
@@ -680,13 +719,15 @@ async function setCam(s){camStream=s;vid.srcObject=s;try{await vid.play();}catch
 async function openCam(){
   const my=++camSeq;
   if(camStream)camStream.getTracks().forEach(t=>t.stop());
-  const s=await navigator.mediaDevices.getUserMedia({video:vcons()});
+  let s;
+  try{s=await navigator.mediaDevices.getUserMedia({video:vcons()});}
+  catch(e){if(e.name==='NotAllowedError')throw e;s=await navigator.mediaDevices.getUserMedia({video:{facingMode:facing}});}   // looser constraints as a last try
   if(my!==camSeq){s.getTracks().forEach(t=>t.stop());return;}   // a newer request won
   await setCam(s);
 }
 const camErr=e=>e&&e.name==='NotAllowedError'?'Camera is blocked. Allow it in Settings › Safari › Camera (or the aA menu › Website Settings), then reload.':'Camera failed: '+(e&&e.message||e);
 
-// ---------- microphone + tape-sound chain (built once; only the mic source is swapped) ----------
+// ---------- microphone + tape-sound chain (built once; only the source is swapped) ----------
 let actx=null,au=null,analyser=null,abuf=null,micStream=null,micTrack=null;
 function ensureAudio(){
   if(actx)return;
@@ -694,6 +735,7 @@ function ensureAudio(){
     actx=new (window.AudioContext||window.webkitAudioContext)();
     const inG=actx.createGain();
     analyser=actx.createAnalyser();analyser.fftSize=256;abuf=new Uint8Array(256);inG.connect(analyser);
+    const silent=actx.createGain();silent.gain.value=0;analyser.connect(silent);silent.connect(actx.destination);   // keeps WebKit pulling the meter
     // VHS linear audio track: ~100 Hz–6.5 kHz, soft tape saturation, wow & flutter, hiss
     const hp=actx.createBiquadFilter();hp.type='highpass';hp.frequency.value=110;
     const lp=actx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=6500;lp.Q.value=.6;
@@ -704,13 +746,14 @@ function ensureAudio(){
     const nb=actx.createBuffer(1,actx.sampleRate*2,actx.sampleRate),nd=nb.getChannelData(0);for(let i=0;i<nd.length;i++)nd[i]=Math.random()*2-1;
     const hs=actx.createBufferSource();hs.buffer=nb;hs.loop=true;const hh=actx.createBiquadFilter();hh.type='highpass';hh.frequency.value=2500;
     const hg=actx.createGain();hg.gain.value=.012;hs.connect(hh);hh.connect(hg);hs.start();
-    const dest=actx.createMediaStreamDestination();
-    inG.connect(hp);hp.connect(lp);lp.connect(ws);ws.connect(dl);dl.connect(dest);hg.connect(dest);
-    au={inG,lp,dl,dest,src:null};
+    const dest=actx.createMediaStreamDestination(),clean=actx.createMediaStreamDestination();
+    inG.connect(hp);hp.connect(lp);lp.connect(ws);ws.connect(dl);dl.connect(dest);hg.connect(dest);inG.connect(clean);
+    au={inG,lp,dl,dest,clean,src:null,clipSrc:null};
     actx.onstatechange=()=>{if(actx.state!=='running')armResume();};
   }catch(e){actx=null;au=null;}
 }
-function armResume(){addEventListener('pointerdown',()=>{if(actx&&actx.state!=='running')actx.resume().catch(()=>{});},{once:true,capture:true});}
+function armResume(){const go=()=>{if(actx&&actx.state!=='running')actx.resume().catch(()=>{});};
+  for(const ev of ['touchend','click'])addEventListener(ev,go,{once:true,capture:true});}
 function setMic(state,msg){$('micDot').className='dot'+(state==='ok'?' ok':state==='bad'?' bad':'');
   $('micTxt').textContent=state==='ok'?'MIC':state==='bad'?'NO MIC · TAP':'MIC…';if(msg)toast(msg);}
 function useMicStream(s){
@@ -719,7 +762,7 @@ function useMicStream(s){
   micTrack.onended=()=>setMic('bad','The mic stopped. Tap NO MIC to reconnect.');
   micTrack.onmute=()=>setMic('bad','iOS paused the mic (a call or another app). It comes back by itself, or tap NO MIC.');
   micTrack.onunmute=()=>setMic('ok');
-  if(au){try{if(au.src)au.src.disconnect();}catch(e){}au.src=actx.createMediaStreamSource(s);au.src.connect(au.inG);}
+  if(au){try{if(au.src)au.src.disconnect();}catch(e){}au.src=actx.createMediaStreamSource(s);if(!clipMode)au.src.connect(au.inG);}
   setMic('ok');return true;
 }
 async function openMic(){
@@ -730,37 +773,73 @@ async function openMic(){
   catch(e){micStream=micTrack=null;setMic('bad',e.name==='NotAllowedError'?'Mic is blocked. Allow it in Settings › Safari › Microphone, then tap NO MIC.':'Mic failed: '+e.message);}
 }
 function recAudioTrack(){
+  const tape=(tab==='VHS'||(tab==='Mosh'&&S.moshFinish==='vhs'))&&S.tapeSound&&au;
+  if(clipMode)return au?(tape?au.dest:au.clean).stream.getAudioTracks()[0]:null;
   if(!micTrack||micTrack.readyState==='ended')return null;
-  if(tab==='VHS'&&S.tapeSound&&au)return au.dest.stream.getAudioTracks()[0];
-  return micTrack;
+  return tape?au.dest.stream.getAudioTracks()[0]:micTrack;
+}
+
+// ---------- clip from Photos: style a video you already shot ----------
+let clipUrl=null;
+$('clipBtn').onclick=()=>{if(recording)return;if(clipMode)backToCamera();else $('clipIn').click();};
+$('clipIn').onchange=async()=>{
+  const f=$('clipIn').files[0];$('clipIn').value='';if(!f)return;
+  ensureAudio();camSeq++;if(camStream){camStream.getTracks().forEach(t=>t.stop());camStream=null;}
+  if(clipUrl)URL.revokeObjectURL(clipUrl);clipUrl=URL.createObjectURL(f);
+  vid.srcObject=null;vid.src=clipUrl;vid.loop=true;vid.muted=false;clipMode=true;
+  if(au){if(!au.clipSrc){try{au.clipSrc=actx.createMediaElementSource(vid);}catch(e){}}
+    try{if(au.src)au.src.disconnect(au.inG);}catch(e){}if(au.clipSrc)au.clipSrc.connect(au.inG);}
+  $('clipBtn').textContent='● Back to camera';$('clipBtn').classList.add('on');$('flip').disabled=true;needReset=true;
+  try{await vid.play();}catch(e){toast('Tap the picture to start the clip.');}
+  if(!started){started=true;$('start').hidden=true;placePic();loadRoll();}
+};
+async function backToCamera(){
+  clipMode=false;vid.pause();vid.removeAttribute('src');vid.load();vid.muted=true;vid.loop=false;
+  if(clipUrl){URL.revokeObjectURL(clipUrl);clipUrl=null;}
+  if(au){try{if(au.clipSrc)au.clipSrc.disconnect();}catch(e){}if(au.src)au.src.connect(au.inG);}
+  $('clipBtn').textContent='＋ Clip';$('clipBtn').classList.remove('on');$('flip').disabled=false;
+  try{await openCam();}catch(e){toast(camErr(e));}
 }
 
 // ---------- capture ----------
-let rec=null,chunks=null,countdown=null;
+let rec=null,recStream=null,chunks=null,countdown=null,recBusy=false;
 const pickType=()=>['video/mp4;codecs=avc1,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm'].find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||'';
 const fileStamp=()=>{const d=new Date();return `${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}${p2(d.getSeconds())}`;};
 function flashFx(){const f=$('flash');f.classList.add('on');requestAnimationFrame(()=>requestAnimationFrame(()=>f.classList.remove('on')));}
-function takePhoto(){flashFx();photoPending=true;newFrame=true;}   // rendered in the next frame, so it always has the current look
+function takePhoto(){flashFx();pendingShots++;updateThumb();photoPending=true;newFrame=true;}   // rendered in the next frame, so it always has the current look
 function finishPhoto(){const name=`bekfaye-${tab.toLowerCase()}-${fileStamp()}.jpg`,th=makeThumb();   // name+thumb now, encoding finishes later
-  out.toBlob(b=>{if(b)addCapture(b,name,th);else toast('Could not save that photo.');},'image/jpeg',.95);}
+  out.toBlob(b=>{pendingShots=Math.max(0,pendingShots-1);if(b)addCapture(b,name,th);else{updateThumb();toast('Could not save that photo.');}},'image/jpeg',.95);}
 async function startRec(){
-  if(actx){try{await actx.resume();}catch(e){}}
-  const s=out.captureStream(30),at=recAudioTrack();if(at)s.addTrack(at);
-  if(!at)toast('Recording without sound: the mic is not connected (tap NO MIC).');
-  const type=pickType(),br={720:4e6,1080:6e6,1440:9e6}[S.quality]||6e6;
-  try{rec=new MediaRecorder(s,type?{mimeType:type,videoBitsPerSecond:br,audioBitsPerSecond:128000}:{});}
-  catch(e){toast('Video recording is not supported here: '+e.message);return;}
-  chunks=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
-  rec.onerror=e=>toast('Recording problem: '+(e.error&&e.error.message||'unknown'));
-  rec.onstop=()=>{recording=false;setRecUI();const ty=rec.mimeType||type||'video/mp4',b=new Blob(chunks||[],{type:ty});chunks=null;
-    if(b.size)addCapture(b,`bekfaye-${tab.toLowerCase()}-${fileStamp()}.${ty.includes('mp4')?'mp4':'webm'}`);else toast('That recording came out empty.');};
-  rec.start(1000);recording=true;recStart=performance.now();stampKey='';setRecUI();
+  if(recBusy||recording)return;recBusy=true;
+  try{
+    if(actx)await Promise.race([actx.resume().catch(()=>{}),new Promise(r=>setTimeout(r,400))]);
+    if(clipMode){vid.currentTime=0;vid.loop=false;vid.onended=()=>stopRec();vid.play().catch(()=>{});}
+    const s=out.captureStream(30),at=recAudioTrack();if(at)s.addTrack(at);
+    if(!at)toast('Recording without sound: the mic is not connected (tap NO MIC).');
+    const type=pickType(),br={720:6e6,1080:10e6,1440:14e6}[S.quality]||10e6;   // mosh and grain need bitrate or H.264 turns them to mush
+    try{rec=new MediaRecorder(s,type?{mimeType:type,videoBitsPerSecond:br,audioBitsPerSecond:128000}:{});}
+    catch(e){s.getVideoTracks().forEach(t=>t.stop());toast('Video recording is not supported here: '+e.message);return;}
+    recStream=s;chunks=[];
+    rec.ondataavailable=e=>{if(e.data&&e.data.size&&chunks)chunks.push(e.data);};
+    rec.onerror=e=>toast('Recording problem: '+(e.error&&e.error.message||'unknown'));
+    rec.onstop=()=>finishRec(type);
+    rec.start(1000);recording=true;recStart=performance.now();stampKey='';setRecUI();
+  }finally{recBusy=false;}
 }
-function stopRec(){if(rec&&rec.state!=='inactive')rec.stop();}
+function finishRec(type){
+  if(!recording&&!chunks)return;                       // already finished
+  recording=false;if(recStream)recStream.getVideoTracks().forEach(t=>t.stop());recStream=null;   // never stop the audio track: it is the mic
+  if(clipMode){vid.loop=true;vid.onended=null;vid.play().catch(()=>{});}
+  setRecUI();
+  const ty=((rec&&rec.mimeType)||type||'video/mp4').split(';')[0],b=new Blob(chunks||[],{type:ty});chunks=null;
+  if(b.size)addCapture(b,`bekfaye-${tab.toLowerCase()}-${fileStamp()}.${ty.includes('mp4')?'mp4':'webm'}`);else toast('That recording came out empty.');
+}
+function stopRec(){if(rec&&rec.state!=='inactive')rec.stop();else if(recording)finishRec('');}
 function setRecUI(){
   $('shutter').classList.toggle('rec',recording);$('pic').classList.toggle('rec',recording);
   $('pv').hidden=recording;$('recBig').hidden=!recording;$('recBig').textContent='● 0:00';
-  for(const b of [...$('tabs').children,$('flip'),$('thumb')])b.disabled=recording;
+  for(const b of [...$('tabs').children,$('thumb'),$('clipBtn')])b.disabled=recording;
+  $('flip').disabled=recording||clipMode;
 }
 $('shutter').onclick=()=>{
   if(actx&&actx.state!=='running')actx.resume().catch(()=>{});       // still inside the tap
@@ -775,28 +854,34 @@ $('shutter').onclick=()=>{
 
 // ---------- roll: every shot is kept here (IndexedDB) until you delete it ----------
 const DB={db:null,
-  open(){return this.db||(this.db=new Promise((res,rej)=>{const r=indexedDB.open('bekfaye',1);r.onupgradeneeded=()=>r.result.createObjectStore('roll',{keyPath:'id'});
-    r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}));},
-  async run(mode,fn){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('roll',mode),q=fn(t.objectStore('roll'));
-    t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);});},
+  open(){if(!this.db)this.db=new Promise((res,rej)=>{const r=indexedDB.open('bekfaye',1);r.onupgradeneeded=()=>r.result.createObjectStore('roll',{keyPath:'id'});
+    r.onsuccess=()=>{const d=r.result;d.onclose=()=>{this.db=null;};d.onversionchange=()=>{d.close();this.db=null;};res(d);};
+    r.onerror=()=>{this.db=null;rej(r.error);};});return this.db;},
+  async run(mode,fn,retry=true){   // iOS closes idle connections after the app is suspended: reopen once
+    try{const db=await this.open();return await new Promise((res,rej)=>{const t=db.transaction('roll',mode),q=fn(t.objectStore('roll'));
+      t.oncomplete=()=>res(q&&q.result);t.onerror=()=>rej(t.error);t.onabort=()=>rej(t.error);});}
+    catch(e){this.db=null;if(retry)return this.run(mode,fn,false);throw e;}},
   put(it){const {url,...rest}=it;return this.run('readwrite',s=>s.put(rest));},del(id){return this.run('readwrite',s=>s.delete(id));},
   clear(){return this.run('readwrite',s=>s.clear());},all(){return this.run('readonly',s=>s.getAll());}};
-let roll=[];
+let roll=[],selecting=false,picked=new Set();
 function makeThumb(){const c=document.createElement('canvas'),k=160/Math.max(out.width,out.height);c.width=Math.round(out.width*k);c.height=Math.round(out.height*k);
   c.getContext('2d').drawImage(out,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.7);}
 function addCapture(blob,name,thumb){
   const it={id:Date.now()+'-'+Math.random().toString(36).slice(2,6),name,type:blob.type,blob,thumb:thumb||makeThumb(),ts:Date.now(),saved:false};
-  roll.unshift(it);updateThumb();
+  roll.unshift(it);updateThumb(true);
   DB.put(it).catch(()=>toast('Could not keep this in the Roll (storage full?). Save it now.'));
   if(S.preview)openViewer(it);
 }
-function updateThumb(){const t=$('thumb'),b=t.firstChild;
-  t.style.backgroundImage=roll[0]?`url(${roll[0].thumb})`:'';b.hidden=!roll.length;b.textContent=roll.length;}
-async function loadRoll(){try{roll=(await DB.all()).sort((a,b)=>b.ts-a.ts);updateThumb();}catch(e){}}
+function updateThumb(pop){const t=$('thumb'),b=t.firstChild,n=roll.length+pendingShots;
+  t.style.backgroundImage=roll[0]?`url(${roll[0].thumb})`:'';b.hidden=!n;b.textContent=n;
+  if(pop){t.classList.remove('pop');void t.offsetWidth;t.classList.add('pop');}}
+async function loadRoll(){try{roll=(await DB.all()).sort((a,b)=>b.ts-a.ts);updateThumb();}catch(e){}
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}}
+const fileType=it=>(it.blob.type||it.type||'').split(';')[0];
 async function shareItems(items){
   if(!items.length)return false;
-  const files=items.map(it=>new File([it.blob],it.name,{type:it.blob.type||it.type}));
-  if(!(navigator.canShare&&navigator.canShare({files}))){toast(items[0].type.startsWith('image')?'Sharing is not available here. Long-press the photo to save it.':'Sharing is not available here.');return false;}
+  const files=items.map(it=>new File([it.blob],it.name,{type:fileType(it)}));
+  if(!(navigator.canShare&&navigator.canShare({files}))){toast(fileType(items[0]).startsWith('image')?'Sharing is not available here. Long-press the photo to save it.':'Sharing is not available here.');return false;}
   try{await navigator.share({files});items.forEach(it=>{it.saved=true;DB.put(it).catch(()=>{});});return true;}
   catch(e){if(e.name!=='AbortError')toast('Share failed: '+e.message);return false;}
 }
@@ -806,21 +891,28 @@ function armConfirm(btn,fn){
   setTimeout(()=>{if(btn.dataset.armed){delete btn.dataset.armed;btn.textContent=btn.dataset.label;}},2500);
 }
 function drawRoll(){
-  $('rollTitle').textContent=`Roll · ${roll.length}`;const grid=$('rollGrid');grid.replaceChildren();
+  $('rollTitle').textContent=selecting?`${picked.size} selected`:`Roll · ${roll.length}`;
+  const grid=$('rollGrid');grid.replaceChildren();$('rollEmpty').hidden=!!roll.length;
   roll.forEach(it=>{const b=document.createElement('button');b.style.backgroundImage=`url(${it.thumb})`;b.setAttribute('aria-label',it.name);
-    if(it.type.startsWith('video')){const i=document.createElement('i');i.textContent='▶ VIDEO';b.append(i);}
+    if(fileType(it).startsWith('video')){const i=document.createElement('i');i.textContent='▶ VIDEO';b.append(i);}
     if(it.saved){const s=document.createElement('em');s.textContent='✓';b.append(s);}
-    b.onclick=()=>openViewer(it);grid.append(b);});
-  $('rollSaveAll').disabled=!roll.length;
+    if(selecting){b.append(document.createElement('u'));if(picked.has(it))b.classList.add('sel');}
+    b.onclick=()=>{if(!selecting)return openViewer(it);picked.has(it)?picked.delete(it):picked.add(it);drawRoll();};grid.append(b);});
+  $('rollSel').textContent=selecting?'Cancel':'Select';$('rollSel').disabled=!roll.length;
+  $('rollSave').textContent=selecting?`Save (${picked.size})`:'Save all';$('rollDel').textContent=selecting?`Delete (${picked.size})`:'Clear roll';
+  $('rollSave').disabled=selecting?!picked.size:!roll.length;$('rollDel').disabled=selecting?!picked.size:!roll.length;
 }
-$('thumb').onclick=()=>{if(!roll.length){toast('No shots yet. Take one with the big button.');return;}drawRoll();$('roll').hidden=false;};
+async function removeItems(items){const set=new Set(items);roll=roll.filter(x=>!set.has(x));for(const it of items){try{await DB.del(it.id);}catch(e){}}updateThumb();}
+$('thumb').onclick=()=>{selecting=false;picked.clear();drawRoll();$('roll').hidden=false;};
 $('rollDone').onclick=()=>{$('roll').hidden=true;};
-$('rollSaveAll').onclick=async()=>{const un=roll.filter(i=>!i.saved);await shareItems(un.length?un:roll);drawRoll();};
-$('rollClear').onclick=()=>armConfirm($('rollClear'),async()=>{roll=[];try{await DB.clear();}catch(e){}updateThumb();drawRoll();});
+$('rollSel').onclick=()=>{selecting=!selecting;picked.clear();drawRoll();};
+$('rollSave').onclick=async()=>{const items=selecting?[...picked]:(roll.filter(i=>!i.saved).length?roll.filter(i=>!i.saved):roll);
+  if(await shareItems(items)){selecting=false;picked.clear();}drawRoll();};
+$('rollDel').onclick=()=>armConfirm($('rollDel'),async()=>{await removeItems(selecting?[...picked]:[...roll]);selecting=false;picked.clear();drawRoll();});
 let viewing=null,viewUrl=null;
 function openViewer(it){
   viewing=it;if(viewUrl)URL.revokeObjectURL(viewUrl);viewUrl=URL.createObjectURL(it.blob);
-  const el=document.createElement(it.type.startsWith('image')?'img':'video');el.src=viewUrl;
+  const el=document.createElement(fileType(it).startsWith('image')?'img':'video');el.src=viewUrl;
   if(el.tagName==='VIDEO'){el.controls=true;el.playsInline=true;el.autoplay=true;el.play().catch(()=>{});}
   $('media').replaceChildren(el);$('viewNote').textContent=it.saved?'Saved ✓':'Save opens the share sheet. Choose Save Image / Save Video.';
   $('result').hidden=false;
@@ -828,25 +920,31 @@ function openViewer(it){
 function closeViewer(){$('result').hidden=true;$('media').replaceChildren();if(viewUrl){URL.revokeObjectURL(viewUrl);viewUrl=null;}viewing=null;}
 $('close').onclick=closeViewer;
 $('save').onclick=async()=>{if(viewing&&await shareItems([viewing])){$('viewNote').textContent='Saved ✓';if(!$('roll').hidden)drawRoll();}};
-$('del').onclick=()=>armConfirm($('del'),async()=>{const it=viewing;roll=roll.filter(x=>x!==it);try{await DB.del(it.id);}catch(e){}
-  closeViewer();updateThumb();if(!$('roll').hidden)drawRoll();});
+$('del').onclick=()=>armConfirm($('del'),async()=>{await removeItems([viewing]);closeViewer();if(!$('roll').hidden)drawRoll();});
 
 // ---------- UI ----------
 let toastT;function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,4200);}
 function setS(k,v){S[k]=v;save();const el=$('s-'+k);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v;}stampKey='';syncQuick();}
-const STAMPS=['none','classic','tall','digital'],STAMP_LABEL={none:'Stamp: Off',classic:'Stamp: Classic',tall:'Stamp: Tall',digital:'Stamp: Digital'};
-function syncQuick(){$('stampBtn').textContent=STAMP_LABEL[S.stamp];$('gridBtn').classList.toggle('on',!!S.grid);$('grid').hidden=!S.grid;
-  $('wear').value=S.wear;$('str').value=S.str;$('customRow').hidden=!S.custom;}
+const STYLES=['classic','tall','digital'],STYLE_LABEL={classic:'Classic',tall:'Tall',digital:'Digital'};
+function syncQuick(){
+  const on=S.stamp!=='none',sb=$('stampBtn');sb.textContent=on?`Stamp: ${STYLE_LABEL[S.stamp]}`:'Stamp: Off';sb.classList.toggle('on',on);
+  $('gridBtn').classList.toggle('on',!!S.grid);$('grid').hidden=!S.grid;
+  $('wear').value=S.wear;$('str').value=S.str;$('customRow').hidden=!S.custom;
+  const tb=$('tbadge');tb.hidden=S.timer==='0';tb.textContent=S.timer+'s';
+  $('mFinish').textContent='Finish: '+{none:'None',vhs:'VHS',main:'Main'}[S.moshFinish];$('mFinish').classList.toggle('on',S.moshFinish!=='none');
+}
 function updateCaption(){
   const it=curItem(),c=$('caption');c.replaceChildren();const b=document.createElement('b');b.textContent=it[0];c.append(b,' — '+it[2]);
   let extra='';
   if(tab==='Mosh'){
     if(tool==='brush')extra='Brush: paint where the mosh happens.';else if(tool==='erase')extra='Erase: remove parts of the mask.';
     else if(tool==='lasso')extra='Lasso: draw around an area; only it moshes.';
-    else if(!PIVOT_MODES.includes(it[0])&&it[0]!=='Drag')extra='Tap the picture for a clean frame. Hold ■ for transitions.';
-    if(keyMode)extra+=keyMode===1?' Key Sky: only bright areas mosh.':' Key Dark: only dark areas mosh.';
-    if(beatOn)extra+=' Beat: loud sounds snap a clean frame.';
-  }else extra='Swipe the picture to change look · hold it to compare.';
+    else if(!PIVOT_MODES.includes(it[0])&&it[0]!=='Drag')extra='Tap the picture for a new frame. Freeze: tap to lock, hold for a moment.';
+    if(keyMode)extra+=' '+['','Key Sky: only bright areas mosh.','Key Dark: only dark areas mosh.','Key Motion: only moving things mosh.'][keyMode];
+    if(beatOn)extra+=' Beat: loud sounds pulse the mosh.';
+    if(latched)extra='FROZEN. Move the camera to drag the picture. Tap Freeze to let go.';
+  }else if(!S.knowsGestures)extra='Swipe the picture to change look · hold it to compare · double-tap resets zoom.';
+  if(clipMode)extra='Clip from Photos. Recording plays it from the start and stops at the end. '+extra;
   if(extra)c.append(document.createElement('br'),extra);
 }
 function drawChips(){
@@ -854,7 +952,7 @@ function drawChips(){
   ITEMS[tab].forEach((it,i)=>{const b=document.createElement('button');b.textContent=it[0];if(i===sel[tab])b.className='on';b.onclick=()=>pick(i);box.append(b);});
   const on=box.children[sel[tab]];if(on)box.scrollLeft=on.offsetLeft-box.clientWidth/2+on.offsetWidth/2;
 }
-function pick(i){sel[tab]=i;S['sel'+tab]=i;save();needReset=true;drawChips();updateCaption();drawGuide();}
+function pick(i){sel[tab]=i;S['sel'+tab]=i;save();needReset=true;drawChips();updateMoshUI();}
 function stepLook(d){const n=ITEMS[tab].length;pick((sel[tab]+d+n)%n);}
 function setTab(t){
   if(recording)return;
@@ -864,52 +962,81 @@ function setTab(t){
   needReset=true;stampKey='';drawChips();updateMoshUI();
 }
 $('tabs').onclick=e=>{const b=e.target.closest('button[data-t]');if(b)setTab(b.dataset.t);};
-function setZoom(z){zoom=Math.min(8,Math.max(1,z));[...$('zoom').children].forEach(c=>c.classList.toggle('on',+c.dataset.z===Math.round(zoom)&&Math.abs(zoom-Math.round(zoom))<.05));}
+function setZoom(z){zoom=Math.min(8,Math.max(1,z));const r=Math.round(zoom),exact=Math.abs(zoom-r)<.05&&[1,2,4,8].includes(r);
+  [...$('zoom').querySelectorAll('button')].forEach(c=>c.classList.toggle('on',exact&&+c.dataset.z===r));
+  const zv=$('zv');zv.hidden=exact;zv.textContent=zoom.toFixed(1)+'×';}
 [1,2,4,8].forEach(z=>{const b=document.createElement('button');b.textContent=z+'×';b.dataset.z=z;if(z===1)b.className='on';
-  b.onclick=e=>{e.stopPropagation();setZoom(z);needReset=true;};$('zoom').append(b);});
+  b.onclick=()=>{setZoom(z);needReset=true;};$('zoom').append(b);});
 function setVideoMode(v){videoMode=v;S.video=v;save();[...$('pv').children].forEach(c=>c.classList.toggle('on',(c.dataset.v==='1')===v));$('shutter').classList.toggle('vid',v);}
 $('pv').onclick=e=>{const b=e.target.closest('button');if(b&&!recording)setVideoMode(b.dataset.v==='1');};
 $('flip').onclick=async()=>{
-  if(recording)return;const prev=facing;facing=facing==='user'?'environment':'user';
+  if(recording||clipMode)return;const prev=facing;facing=facing==='user'?'environment':'user';
   try{await openCam();}catch(e){facing=prev;toast(camErr(e));openCam().catch(()=>{});}
   if(micTrack&&micTrack.readyState==='ended')openMic();
 };
-$('mic').onclick=()=>{if(!started)return;if(micTrack&&micTrack.readyState==='live'&&!micTrack.muted){toast(`Mic is working. Level ${Math.round(level*100)}%.`);return;}openMic();};
+$('mic').onclick=()=>{if(!started)return;const m=$('mic');m.classList.remove('pulse');void m.offsetWidth;m.classList.add('pulse');
+  if(micTrack&&micTrack.readyState==='live'&&!micTrack.muted){toast(`Mic is working. Level ${Math.round(level*100)}%.`);return;}openMic();};
 $('wear').oninput=e=>setS('wear',+e.target.value);
 $('str').oninput=e=>setS('str',+e.target.value);
-$('stampBtn').onclick=()=>setS('stamp',STAMPS[(STAMPS.indexOf(S.stamp)+1)%STAMPS.length]);
+// Stamp: tap = on/off, hold = next style
+const sb=$('stampBtn');let sbT=0,sbLong=false;
+sb.addEventListener('pointerdown',()=>{sbLong=false;sbT=setTimeout(()=>{sbLong=true;const nx=STYLES[(STYLES.indexOf(S.stampStyle)+1)%3];S.stampStyle=nx;setS('stamp',nx);toast('Stamp style: '+STYLE_LABEL[nx]);},450);});
+sb.addEventListener('pointerup',()=>{clearTimeout(sbT);if(!sbLong)setS('stamp',S.stamp==='none'?S.stampStyle:'none');});
+sb.addEventListener('pointercancel',()=>clearTimeout(sbT));
 $('gridBtn').onclick=()=>setS('grid',!S.grid);
 $('clean').onclick=()=>{needReset=true;};
-const hb=$('holdBtn');
-const capture=(el,e)=>{try{el.setPointerCapture(e.pointerId);}catch(_){}};
-hb.addEventListener('pointerdown',e=>{capture(hb,e);needReset=true;holding=true;hb.classList.add('on');});
-for(const ev of ['pointerup','pointercancel','lostpointercapture'])hb.addEventListener(ev,()=>{holding=false;hb.classList.remove('on');});
+// Freeze: quick tap = lock on/off (hands-free while recording), press and hold = freeze only while held
+const hb=$('holdBtn'),capture=(el,e)=>{try{el.setPointerCapture(e.pointerId);}catch(_){}};let hbDown=0;
+hb.addEventListener('pointerdown',e=>{capture(hb,e);hbDown=performance.now();if(!latched){needReset=true;holding=true;}hb.classList.add('on');});
+function hbUp(){if(!hbDown)return;const quick=performance.now()-hbDown<280;hbDown=0;
+  if(latched){latched=false;holding=false;}else if(quick){latched=true;holding=true;}else holding=false;
+  hb.classList.toggle('on',holding);hb.textContent=latched?'■ Frozen':'■ Freeze';updateCaption();}
+for(const ev of ['pointerup','pointercancel'])hb.addEventListener(ev,hbUp);
 
 // mosh tools
 function updateMoshUI(){
-  const m=tab==='Mosh',paint=['brush','erase','lasso'].includes(tool);
-  $('mtools').hidden=!m;$('mtList').hidden=!toolsOpen;$('mtToggle').textContent=toolsOpen?'Tools ▴':'Tools ▾';
-  [...$('mtList').querySelectorAll('[data-tool]')].forEach(b=>b.classList.toggle('on',b.dataset.tool===tool));
-  $('mInv').classList.toggle('on',inv);$('mBeat').classList.toggle('on',beatOn);$('mKey').classList.toggle('on',!!keyMode);
-  $('mKey').textContent=['Key: Off','Key: Sky','Key: Dark'][keyMode];
-  $('rowSize').hidden=!(tool==='brush'||tool==='erase');$('rowFeather').hidden=!(paint||maskUse||keyMode);$('rowKey').hidden=!keyMode;
-  $('mslide').hidden=!m||!toolsOpen||($('rowSize').hidden&&$('rowFeather').hidden&&$('rowKey').hidden);
+  const m=tab==='Mosh',open=m&&S.toolsOpen,paint=['brush','erase','lasso'].includes(tool),name=curItem()[0];
+  $('mdrawer').hidden=!open;
+  $('toolsBtn').classList.toggle('on',!!S.toolsOpen);$('toolsBtn').textContent=(S.toolsOpen?'Tools ▾':'Tools ▴')+(!S.toolsOpen&&(maskUse||keyMode)?' •':'');
+  $('tapTool').textContent=PIVOT_MODES.includes(name)?'Pivot':name==='Drag'?'Aim':'Tap';
+  [...$('toolSeg').querySelectorAll('[data-tool]')].forEach(b=>b.classList.toggle('on',b.dataset.tool===tool));
+  $('mInv').classList.toggle('on',inv);$('mBeat').classList.toggle('on',beatOn);$('mKey').classList.toggle('on',!!keyMode);$('mShow').classList.toggle('on',showMask);
+  $('mKey').textContent=['Key: Off','Key: Sky','Key: Dark','Key: Motion'][keyMode];
+  $('rowSize').hidden=!(tool==='brush'||tool==='erase');$('rowFeather').hidden=!(paint||maskUse);$('rowKey').hidden=!keyMode;
+  $('sliders').hidden=$('rowSize').hidden&&$('rowFeather').hidden&&$('rowKey').hidden;
+  [...$('recipes').querySelectorAll('button')].forEach(b=>b.classList.toggle('has',!!S.recipes[+b.dataset.r]));
   maskV.hidden=!(m&&(paint||showMask));guideC.hidden=!m;
-  const badge=$('maskBadge');badge.hidden=!(m&&(maskUse||keyMode));
-  badge.textContent=(maskUse?'MASK':keyMode?'KEY':'MASK')+(inv?' · INV':'')+(showMask?' · SHOWN':' · TAP TO SHOW');
-  drawGuide();drawMaskView();updateCaption();
+  syncQuick();drawGuide();drawMaskView();updateCaption();
 }
-$('mtToggle').onclick=()=>{toolsOpen=!toolsOpen;updateMoshUI();};
-$('mtList').onclick=e=>{const b=e.target.closest('[data-tool]');if(!b)return;tool=b.dataset.tool;updateMoshUI();};
+$('toolsBtn').onclick=()=>{S.toolsOpen=!S.toolsOpen;save();updateMoshUI();};
+$('toolSeg').onclick=e=>{const b=e.target.closest('[data-tool]');if(!b)return;tool=b.dataset.tool;updateMoshUI();};
 $('mUndo').onclick=()=>{const u=undoStack.pop();if(!u){toast('Nothing to undo.');return;}mctx.putImageData(u.d,0,0);maskUse=u.use;maskDirty=true;updateMoshUI();};
 $('mClear').onclick=()=>{pushUndo();mctx.clearRect(0,0,maskC.width,maskC.height);maskUse=false;maskDirty=true;updateMoshUI();};
 $('mInv').onclick=()=>{inv=!inv;updateMoshUI();};
-$('mKey').onclick=()=>{keyMode=(keyMode+1)%3;updateMoshUI();};
+$('mShow').onclick=()=>{showMask=!showMask;updateMoshUI();};
+$('mKey').onclick=()=>{keyMode=(keyMode+1)%4;updateMoshUI();};
 $('mBeat').onclick=()=>{beatOn=!beatOn;if(beatOn&&!analyser)toast('Beat needs the mic.');updateMoshUI();};
-$('maskBadge').onclick=()=>{showMask=!showMask;updateMoshUI();};
+$('mFinish').onclick=()=>{const f=['none','vhs','main'];setS('moshFinish',f[(f.indexOf(S.moshFinish)+1)%3]);updateMoshUI();};
+$('mReset').onclick=()=>{tool='tap';keyMode=0;inv=false;showMask=false;beatOn=false;latched=holding=false;hb.classList.remove('on');hb.textContent='■ Freeze';
+  if(maskUse)pushUndo();mctx.clearRect(0,0,maskC.width,maskC.height);maskUse=false;maskDirty=true;pivot=[.5,.5];dragDir=[.004,0];$('amt').value=.6;
+  S.moshFinish='none';save();needReset=true;updateMoshUI();toast('Mosh reset.');};
 $('feather').value=S.feather;$('feather').oninput=e=>{S.feather=+e.target.value;save();};
+// recipe slots: tap = load, hold = save the whole mosh setup (look, amount, pivot, aim, key, invert, beat, finish, mask)
+for(const b of $('recipes').querySelectorAll('button')){
+  let t=0,long=false;const r=+b.dataset.r;
+  b.addEventListener('pointerdown',()=>{long=false;t=setTimeout(()=>{long=true;
+    S.recipes[r]={sel:sel.Mosh,amt:+$('amt').value,pivot,dragDir,keyMode,thr:+$('kthr').value,inv,beatOn,feather:S.feather,finish:S.moshFinish,
+      mask:maskUse?maskC.toDataURL('image/png'):null};save();updateMoshUI();toast(`Saved to slot ${r+1}.`);},500);});
+  b.addEventListener('pointerup',()=>{clearTimeout(t);if(long)return;const R=S.recipes[r];if(!R){toast(`Slot ${r+1} is empty. Hold it to save.`);return;}
+    sel.Mosh=clampSel('Mosh',R.sel);S.selMosh=sel.Mosh;$('amt').value=R.amt;pivot=R.pivot||[.5,.5];dragDir=R.dragDir||[.004,0];keyMode=R.keyMode|0;
+    $('kthr').value=R.thr;inv=!!R.inv;beatOn=!!R.beatOn;S.feather=R.feather;$('feather').value=R.feather;S.moshFinish=R.finish||'none';save();
+    mctx.clearRect(0,0,maskC.width,maskC.height);maskUse=false;maskDirty=true;
+    if(R.mask){const im=new Image();im.onload=()=>{mctx.drawImage(im,0,0,maskC.width,maskC.height);maskUse=true;maskDirty=true;updateMoshUI();};im.src=R.mask;}
+    needReset=true;drawChips();updateMoshUI();toast(`Loaded slot ${r+1}.`);});
+  b.addEventListener('pointercancel',()=>clearTimeout(t));
+}
 
-function pushUndo(){undoStack.push({d:mctx.getImageData(0,0,maskC.width,maskC.height),use:maskUse});if(undoStack.length>15)undoStack.shift();}
+function pushUndo(){if(!maskC.width)return;undoStack.push({d:mctx.getImageData(0,0,maskC.width,maskC.height),use:maskUse});if(undoStack.length>15)undoStack.shift();}
 // what you see: the mask in red, or everything except the mask when Invert is on
 function drawMaskView(){
   const w=maskV.width,h=maskV.height;if(!w)return;mvctx.clearRect(0,0,w,h);
@@ -920,7 +1047,7 @@ function drawMaskView(){
 function picRect(){const r=$('view').getBoundingClientRect(),a=(out.width/out.height)||1;let w=r.width,h=r.height;
   if(w/h>a)w=h*a;else h=w/a;return {x:(r.width-w)/2,y:(r.height-h)/2,w,h,left:r.left,top:r.top};}
 function placePic(){const p=picRect(),s=$('pic').style;s.left=p.x+'px';s.top=p.y+'px';s.width=p.w+'px';s.height=p.h+'px';}
-addEventListener('resize',placePic);
+if(window.ResizeObserver)new ResizeObserver(placePic).observe($('view'));else addEventListener('resize',placePic);
 function toPic(e){const p=picRect();return {x:(e.clientX-p.left-p.x)/p.w,y:(e.clientY-p.top-p.y)/p.h};}
 const inside=p=>p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1,clamp01=p=>({x:Math.min(1,Math.max(0,p.x)),y:Math.min(1,Math.max(0,p.y))});
 function drawGuide(){
@@ -948,11 +1075,13 @@ function paint(a,b){
   if(tool==='brush')maskUse=true;maskDirty=true;drawMaskView();
 }
 
-// one gesture handler for the picture: pinch = zoom, swipe = next look (VHS/West), hold = compare, Mosh tools
-const view=$('view'),ptrs=new Map();let gest=null,longT=0;
+// one gesture handler for the picture: pinch = zoom, swipe = next look (VHS/West), hold = compare, double-tap = zoom 1×, Mosh tools
+const view=$('view'),ptrs=new Map();let gest=null,longT=0,lastTapT=0;
 const cancelLong=()=>{clearTimeout(longT);longT=0;};
 view.addEventListener('pointerdown',e=>{
-  if(e.target.closest('#mtools,#mslide'))return;
+  if(e.target.closest('#mdrawer'))return;
+  if(clipMode&&vid.paused)vid.play().catch(()=>{});
+  if(e.isPrimary)ptrs.clear();                          // first finger down: forget any stale pointers
   capture(view,e);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(ptrs.size===2){cancelLong();if(gest&&(gest.kind==='draw'||gest.kind==='lasso')){lasso=[];drawGuide();}
     const [a,b]=[...ptrs.values()];gest={kind:'pinch',d0:Math.hypot(a.x-b.x,a.y-b.y)||1,z0:zoom};return;}
@@ -976,36 +1105,48 @@ view.addEventListener('pointermove',e=>{
   else if(gest.kind==='lasso'){lasso.push(clamp01(p));drawGuide();}
   else if(gest.kind==='tap'&&moved>14){cancelLong();gest.kind=tab==='Mosh'?'none':'swipe';}
 });
-function endGesture(e){
+function learned(){if(!S.knowsGestures){S.knowsGestures=true;save();updateCaption();}}
+view.addEventListener('pointerup',e=>{
   ptrs.delete(e.pointerId);
   if(!gest)return;
   if(gest.kind==='pinch'){if(ptrs.size<2){gest=null;needReset=true;}return;}
-  const dx=e.clientX-gest.x0,dy=e.clientY-gest.y0;
-  if(gest.kind==='tap'&&tab==='Mosh')needReset=true;
-  else if(gest.kind==='swipe'&&Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.2)stepLook(dx<0?1:-1);
-  else if(gest.kind==='compare'){compare=false;$('cmp').hidden=true;}
+  const dx=e.clientX-gest.x0,dy=e.clientY-gest.y0,now=performance.now();
+  if(gest.kind==='tap'){
+    if(tab==='Mosh')needReset=true;
+    else{if(now-lastTapT<320){setZoom(1);needReset=true;lastTapT=0;}else lastTapT=now;}
+  }
+  else if(gest.kind==='swipe'&&Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)*1.2){stepLook(dx<0?1:-1);learned();}
+  else if(gest.kind==='compare'){compare=false;$('cmp').hidden=true;learned();}
   else if(gest.kind==='dragdir'){const p=picRect(),L=Math.hypot(dx,dy);if(L>20){dragDir=[dx/L*.004,-dy/L*.004*p.w/p.h];drawGuide();}}
   else if(gest.kind==='lasso'){if(lasso.length>2){const w=maskC.width,h=maskC.height;mctx.fillStyle='#ff2d46';mctx.beginPath();
     lasso.forEach((q,i)=>i?mctx.lineTo(q.x*w,q.y*h):mctx.moveTo(q.x*w,q.y*h));mctx.closePath();mctx.fill();maskUse=true;maskDirty=true;}
     lasso=[];drawGuide();}
   if(gest.kind==='draw'||gest.kind==='lasso')updateMoshUI();
   cancelLong();gest=null;
-}
-view.addEventListener('pointerup',endGesture);view.addEventListener('pointercancel',endGesture);
+});
+view.addEventListener('pointercancel',e=>{   // the system took the touch: clean up only, never act on it
+  ptrs.delete(e.pointerId);cancelLong();
+  if(gest&&gest.kind==='compare'){compare=false;$('cmp').hidden=true;}
+  if(gest&&gest.kind==='lasso'){lasso=[];drawGuide();}
+  if(gest&&gest.kind==='draw')updateMoshUI();
+  gest=null;
+});
 
 // settings sheet
 document.querySelectorAll('[id^="s-"]').forEach(el=>{
   const k=el.id.slice(2);
   if(el.type==='checkbox')el.checked=!!S[k];else el.value=S[k];
   el.addEventListener(el.type==='range'?'input':'change',()=>{
-    S[k]=el.type==='checkbox'?el.checked:el.type==='range'?+el.value:el.value;save();stampKey='';
+    S[k]=el.type==='checkbox'?el.checked:el.type==='range'?+el.value:el.value;
+    if(k==='stamp'&&S.stamp!=='none')S.stampStyle=S.stamp;
+    save();stampKey='';
     if(k==='custom'||k==='cDate'||k==='cTime')customSetAt=Date.now();
-    if(k==='quality'&&started&&!recording)openCam().catch(e=>toast(camErr(e)));
+    if(k==='quality'&&started&&!recording&&!clipMode)openCam().catch(e=>toast(camErr(e)));
     syncQuick();
   });
 });
 $('gear').onclick=()=>{if(recording)return;$('sheet').hidden=false;const box=$('sheetIn'),s=$(tab==='VHS'?'set-vhs':tab==='West'?'set-west':'set-mosh');
-  box.scrollTop=Math.max(0,s.offsetTop-56);};
+  box.scrollTop=Math.max(0,s.offsetTop-50);};
 $('sheetClose').onclick=()=>{$('sheet').hidden=true;};
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').hidden=true;};
 
@@ -1017,7 +1158,7 @@ async function start(){
   if(glErr){$('err').textContent=glErr;return;}
   if(!window.isSecureContext||!navigator.mediaDevices){$('err').textContent='The camera needs this page to be opened over https.';return;}
   starting=true;ensureAudio();if(actx)actx.resume().catch(()=>{});
-  const mot=enableMotion();
+  enableMotion();   // not awaited: a dismissed motion prompt must never block the camera
   try{
     const s=await navigator.mediaDevices.getUserMedia({video:vcons(),audio:ACONS});
     await setCam(new MediaStream(s.getVideoTracks()));
@@ -1026,20 +1167,20 @@ async function start(){
     try{await openCam();}catch(e2){$('err').textContent=camErr(e2);starting=false;return;}
     openMic();
   }
-  await mot;started=true;starting=false;$('start').hidden=true;placePic();loadRoll();
+  started=true;starting=false;$('start').hidden=true;placePic();loadRoll();
 }
 $('go').onclick=start;
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){if(recording)stopRec();return;}
+  if(document.hidden){if(recording)stopRec();ptrs.clear();gest=null;return;}
+  if(recording&&(!rec||rec.state==='inactive'))finishRec('');   // recorder died in the background
   if(!started)return;
   vid.play().catch(()=>{});
-  const vt=camStream&&camStream.getVideoTracks()[0];
-  if(!vt||vt.readyState==='ended')openCam().catch(e=>toast(camErr(e)));
+  if(!clipMode){const vt=camStream&&camStream.getVideoTracks()[0];if(!vt||vt.readyState==='ended')openCam().catch(e=>toast(camErr(e)));}
   if(micTrack&&micTrack.readyState==='ended')openMic();
   if(actx&&actx.state!=='running')armResume();
 });
 
-setVideoMode(videoMode);syncQuick();setTab(tab);
+setVideoMode(videoMode);setTab(tab);
 if(glErr)$('err').textContent=glErr;
 </script>
 </body>
