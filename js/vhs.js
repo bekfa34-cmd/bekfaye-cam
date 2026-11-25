@@ -176,7 +176,7 @@ export function createVhs(viewer, ctx = {}) {
     if (size[0] !== w || size[1] !== h) { makeTarget(0, w, h); makeTarget(1, w, h); size = [w, h]; first = 1; cur = 0; }
     const dt = Math.min(0.2, Math.max(0, time - lastT)); lastT = time;
     shakeV = Math.max(0, shakeV - dt * 1.6);
-    const f = look.fx, shakeOn = settings().shakeNoise !== false;
+    const f = look.fx, shakeOn = settings().shake !== false;
 
     gl.bindVertexArray(vao);
     gl.useProgram(prog);
@@ -217,7 +217,8 @@ export function createVhs(viewer, ctx = {}) {
   const api = {
     looks: VHS_LOOKS,
     attach() { attached = true; viewer.post = post; api.setLook(look.id); },
-    detach() { attached = false; if (viewer.post === post) viewer.post = null; },
+    detach() { attached = false; if (viewer.post === post) viewer.post = null; closeTape(true); },
+    stopTape() { closeTape(false); }, // after a take: the tape chain's oscillators and timer end with it
     setLook(id) {
       const l = lookById.get(id) || look;
       look = l;
@@ -227,13 +228,19 @@ export function createVhs(viewer, ctx = {}) {
     shake(m) { shakeV = Math.max(shakeV, Math.min(1, m || 0)); },
     // wake the tape audio engine; call it inside a tap (create=true before a take) or iOS leaves it suspended and the first take is silent
     resume(create) { warmAudio(!!create); },
-    audioChain(micStream) { return tapeAudio(micStream, () => (settings().shakeNoise === false ? 0 : shakeV)); },
+    audioChain(micStream) { return tapeAudio(micStream, () => (settings().shake === false ? 0 : shakeV)); },
   };
   return api;
 }
 
 /* ---------- tape audio: ~80 Hz-10 kHz, soft saturation, slight wow/flutter, quiet hiss. Voice stays up front. ---------- */
-let audioCtx = null, warmCtx = null;
+let audioCtx = null, warmCtx = null, tapeTick = 0;
+function closeTape(warmToo) {
+  clearInterval(tapeTick);
+  const a = audioCtx; audioCtx = null;
+  if (a) a.close().catch(() => {});
+  if (warmToo && warmCtx) { warmCtx.close().catch(() => {}); warmCtx = null; }
+}
 function warmAudio(create) {
   const AC = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext);
   if (!AC) return;
@@ -247,7 +254,7 @@ function tapeAudio(micStream, getShake) {
   const AC = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext);
   if (!track || !AC) return micStream; // never lose the mic: pass it straight through
   try {
-    if (audioCtx) audioCtx.close().catch(() => {});
+    closeTape(false);
     const a = (audioCtx = warmCtx && warmCtx.state !== 'closed' ? warmCtx : new AC());
     warmCtx = null;
     const src = a.createMediaStreamSource(new MediaStream([track]));
@@ -271,7 +278,7 @@ function tapeAudio(micStream, getShake) {
     hs.connect(hh); hh.connect(hg); hs.start();
     const dest = a.createMediaStreamDestination();
     src.connect(hp); hp.connect(pres); pres.connect(lp); lp.connect(ws); ws.connect(dl); dl.connect(comp); comp.connect(makeup); makeup.connect(dest); hg.connect(dest);
-    const tick = setInterval(() => {
+    const tick = tapeTick = setInterval(() => {
       if (a.state === 'closed') return clearInterval(tick);
       const k = getShake();
       dl.delayTime.setTargetAtTime(0.012 + 0.006 * k, a.currentTime, 0.05);

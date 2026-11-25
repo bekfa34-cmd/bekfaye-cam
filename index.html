@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -33,9 +33,10 @@
     <video id="camVideo" playsinline muted autoplay></video>
     <div id="msg" hidden></div>
     <div id="flash"></div>
-    <div id="count" hidden></div>
     <div id="zr"></div>
-    <button id="key" hidden>Key: off</button>
+    <div id="hud" hidden><i></i><span id="hudTxt"></span></div>
+    <div id="ring"></div>
+    <div id="keyBox" hidden><button id="key">KEY: OFF</button><span id="keyCap"></span></div>
   </main>
 
   <section id="lower">
@@ -63,10 +64,10 @@
   <div class="card">
     <div class="bar"><b>Settings</b><button class="x" data-close>Done</button></div>
     <div class="body">
-      <label class="r"><span>Quality</span><button id="s-tier" class="pill"></button></label>
-      <label class="r"><span>Codec</span><select id="s-codec"><option value="auto">Auto</option><option value="hevc">HEVC</option><option value="h264">H.264</option></select></label>
-      <label class="r"><span>WEST shape</span><select id="s-westRatio"><option value="full">Full</option><option value="4:3">4:3</option><option value="16:9">16:9</option><option value="1:1">1:1</option></select></label>
-      <label class="r"><span>VHS shape</span><select id="s-vhsRatio"><option value="4:3">Standard 3:4</option><option value="16:9">Tall 9:16</option></select></label>
+      <div class="r col"><span>Quality</span><button id="s-tier" class="pill"></button><p class="hint" id="s-tierNote"></p></div>
+      <div class="r col"><span>Codec</span><div class="seg" data-k="codec"><button data-v="auto">Auto</button><button data-v="hevc">HEVC</button><button data-v="h264">H.264</button></div></div>
+      <div class="r col"><span>WEST shape</span><div class="seg" data-k="westRatio"><button data-v="full">Full</button><button data-v="4:3">4:3</button><button data-v="16:9">16:9</button><button data-v="1:1">1:1</button></div></div>
+      <div class="r col"><span>VHS shape</span><div class="seg" data-k="vhsRatio"><button data-v="4:3">4:3 classic</button><button data-v="16:9">16:9 wide</button></div><p class="hint">Held upright these record as 3:4 and 9:16.</p></div>
       <label class="r"><span>Tape sound (VHS)</span><input type="checkbox" id="s-tape"></label>
       <label class="r"><span>Shake adds tracking noise</span><input type="checkbox" id="s-shake"></label>
       <p class="foot"><b>bek. faye</b><br><span id="ver"></span></p>
@@ -78,21 +79,21 @@
 <div class="sheet" id="rollSheet" hidden>
   <div class="card tall">
     <div class="bar"><b id="rollTitle">Roll</b><span><button class="x" id="rollSel">Select</button><button class="x" data-close>Done</button></span></div>
-    <div class="body"><div id="rollGrid"></div><p id="rollEmpty" class="foot">Nothing yet.</p></div>
+    <div class="body"><div id="rollGrid"></div><div id="rollEmpty"><svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="7" y="9" width="34" height="30"/><circle cx="18" cy="20" r="3"/><path d="M7 33l11-9 8 7 6-5 9 8"/></svg><p>Nothing yet</p></div></div>
     <div class="acts"><button class="btn" id="rollSave">Save all</button><button class="btn ghost" id="rollDel">Clear roll</button></div>
   </div>
 </div>
 
 <!-- viewer for one roll item -->
-<div class="sheet" id="viewer" hidden>
+<div class="sheet full" id="viewer" hidden>
   <div class="card tall">
     <div class="media" id="viewMedia"></div>
-    <div class="acts"><button class="btn" id="viewSave">Save</button><button class="btn ghost" id="viewDel">Delete</button><button class="btn ghost" data-close>Close</button></div>
+    <div class="acts"><button class="btn pinkline" id="viewSave">Save</button><button class="btn ghost" id="viewDel">Delete</button><button class="btn ghost" data-close>Close</button></div>
   </div>
 </div>
 
 <!-- mosh review: loops the clip just recorded -->
-<div class="sheet" id="review" hidden>
+<div class="sheet full" id="review" hidden>
   <div class="card tall">
     <div class="media" id="reviewMedia"></div>
     <div class="acts"><button class="btn" id="reviewSave">Save</button><button class="btn ghost" id="reviewTrash">Trash</button></div>

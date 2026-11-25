@@ -15,41 +15,55 @@ const RGB = { grey: '#f00', colour: '#0f0', mirror: '#00f' };
 const CSS = `
 .mx{position:fixed;inset:0;z-index:300;background:#000;color:#F7EDEE;font:15px/1.3 'Babel Sans',system-ui,sans-serif;display:flex;flex-direction:column;
  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.mx *{box-sizing:border-box}.mx button{font:inherit;color:#F7EDEE;background:#53393A;border:1px solid #835965;border-radius:0;text-transform:uppercase;letter-spacing:.12em;font-size:13px;min-height:44px;min-width:44px;padding:0 14px}
+.mx *{box-sizing:border-box}.mx [hidden]{display:none!important}
+.mx button{font:inherit;color:#F7EDEE;background:#53393A;border:1px solid #835965;border-radius:0;text-transform:uppercase;letter-spacing:.12em;font-size:13px;min-height:44px;min-width:44px;padding:0 14px}
 .mx button:active{background:#835965}.mx button.on{background:#C1798D;color:#000;border-color:#C1798D}.mx button[disabled]{opacity:.35}
-.mx-title{text-transform:uppercase;letter-spacing:.25em;font-size:13px}.mx-bar{display:flex;align-items:center;gap:8px;padding:8px 12px}.mx-bar .sp{flex:1}.mx-title{font-weight:600;text-align:center;flex:1}
+.mx-bar{display:flex;align-items:center;gap:8px;padding:6px 12px;flex:none}.mx-title{flex:1;text-align:center;font-weight:600;text-transform:uppercase;letter-spacing:.25em;font-size:13px}
 .mx-center{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:14px;padding:24px}
 .mx-center button{min-height:60px;font-size:17px}
-.mx-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#000;touch-action:none}
-.mx-stage .box{position:relative;max-width:100%;max-height:100%}
-.mx-stage canvas,.mx-stage video{display:block;max-width:100%;max-height:100%}
-.mx-ov{position:absolute;inset:0;width:100%;height:100%}.mx-ov svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.mx-vx{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:0;background:#C1798D;border:2px solid #F7EDEE;touch-action:none}
-.mx-pv{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border:2px solid #F7EDEE;border-radius:0;pointer-events:none;box-shadow:0 0 0 1px #000}
-.mx-strip{position:relative;height:56px;margin:6px 14px;border-radius:0;background:#1a0f10;overflow:hidden;touch-action:none}
+.mx-stage{position:relative;flex:1;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;background:#000;touch-action:none;container-type:size}
+.mx-stage video{display:block;max-width:100%;max-height:100%}
+.mx-stage .box{position:relative;width:min(100cqw,calc(100cqh * var(--ar,1)));aspect-ratio:var(--ar,1)}
+.mx-stage .box canvas{display:block;width:100%;height:100%}
+.mx-ov{position:absolute;inset:0}.mx-ov svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.mx-vx{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;touch-action:none}
+.mx-vx::after{content:'';position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid #C1798D;box-shadow:0 0 0 1px #000,inset 0 0 0 1px #000}
+.mx-vx.nopt{pointer-events:none}.mx-vx.nopt::after{width:8px;height:8px;margin:-4px 0 0 -4px;background:#C1798D;border:0}
+.mx-vx.first::after{width:18px;height:18px;margin:-9px 0 0 -9px;border-color:#F7EDEE;background:rgba(193,121,141,.5)}
+.mx-pv{position:absolute;width:20px;height:20px;margin:-10px 0 0 -10px;border:2px solid #F7EDEE;pointer-events:none;box-shadow:0 0 0 1px #000}
+.mx-stage .mx-draw{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:12px;letter-spacing:.15em;text-transform:uppercase;pointer-events:none;text-shadow:0 1px 4px #000}
+.mx-strip{position:relative;flex:none;height:56px;margin:6px 14px;background:#53393A;overflow:hidden;touch-action:none}
 .mx-strip .th{position:absolute;inset:0;display:flex}.mx-strip .th canvas{flex:1;min-width:0;height:100%;object-fit:cover}
-.mx-win{position:absolute;top:0;bottom:0;border:3px solid #F7EDEE;border-radius:0;background:rgba(247,237,238,.12)}
-.mx-win i{position:absolute;top:0;bottom:0;width:22px;background:#F7EDEE}.mx-win i.l{left:-3px}.mx-win i.r{right:-3px}
-.mx-tl{margin:4px 14px;position:relative;touch-action:none;height:152px}
-.mx-lanes{height:104px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
-.mx-track{position:relative;height:44px;border-radius:0;background:#53393A;overflow:hidden}
+.mx-win{position:absolute;top:0;bottom:0;border:3px solid #C1798D;background:rgba(193,121,141,.15)}
+.mx-win i{position:absolute;top:-3px;bottom:-3px;width:14px;background:#C1798D}.mx-win i.l{left:-3px}.mx-win i.r{right:-3px}
+.mx-win i::before{content:'';position:absolute;inset:0 -15px}
+.mx-time{font:12px ui-monospace,monospace;color:#C1798D;text-align:center;padding:2px;flex:none}
+.mx-row{display:flex;gap:8px;padding:6px 12px;flex:none;overflow-x:auto;-webkit-overflow-scrolling:touch;--ml:0px;--mr:0px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--ml),#000 calc(100% - var(--mr)),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 var(--ml),#000 calc(100% - var(--mr)),transparent 100%)}.mx-row button{flex:none;font-size:12px;padding:0 12px}
+.mx-busy{position:absolute;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:9;font-size:17px}
+.mx-busy button{min-width:120px}.mx-busy .mx-time{min-height:16px}
+/* editor: picture first, then the control column (under it in portrait, beside it in landscape) */
+.mx-main{flex:1;min-height:0;display:flex;flex-direction:column}
+.mx-side{flex:none;display:flex;flex-direction:column;max-height:64%;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.mx-tl{position:relative;margin:2px 12px 0;touch-action:none}
+.mx-tlh{display:flex;justify-content:space-between;align-items:baseline;padding:6px 12px 4px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#835965}
+.mx-tlh .mx-time{padding:0}
+.mx-track{position:relative;height:44px;background:#53393A;overflow:hidden}
 .mx-track .th{position:absolute;inset:0;display:flex;opacity:.55}.mx-track .th canvas{flex:1;min-width:0;height:100%}
-.mx-span{position:absolute;top:0;bottom:0;background:rgba(193,121,141,.8);border-left:2px solid #fff;border-right:2px solid #fff}
-.mx-ph{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1.5px;background:#F7EDEE;pointer-events:none;z-index:5}
-.mx-lane{position:relative;height:30px;margin-top:4px;border-radius:0;background:#2a1c1d}
-.mx-bar2{position:absolute;top:2px;bottom:2px;border-radius:0;background:#835965;font-size:11px;line-height:26px;padding-left:22px;overflow:hidden;white-space:nowrap}
-.mx-lane.sel .mx-bar2{background:#C1798D}.mx-bar2 i{position:absolute;top:0;bottom:0;width:20px;background:rgba(255,255,255,.55);touch-action:none}.mx-bar2 i.l{left:0}.mx-bar2 i.r{right:0}
-.mx-row{display:flex;gap:8px;padding:6px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;--ml:0px;--mr:0px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--ml),#000 calc(100% - var(--mr)),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 var(--ml),#000 calc(100% - var(--mr)),transparent 100%)}.mx-row button{flex:none;min-height:40px;font-size:13px;padding:0 12px}
-.mx-mosh{flex:1;min-height:64px!important;font-weight:700;font-size:18px;letter-spacing:.25em;background:#835965!important;touch-action:none}
-.mx-mosh.on{background:#C1798D!important}
-.mx-busy{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:9;font-size:17px}
-.mx-time{font:12px ui-monospace,monospace;color:#C1798D;text-align:center;padding:2px}
-.mx-hint{height:20px;font-size:13px;color:#F7EDEE;text-align:center;padding:0 12px}
-.mx-stage .mx-draw{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:13px;pointer-events:none;text-shadow:0 1px 4px #000}
-.mx-vx.nopt{pointer-events:none;width:22px;height:22px;margin:-11px 0 0 -11px;opacity:.8}
-.mx-vx.first{width:40px;height:40px;margin:-20px 0 0 -20px;background:#F7EDEE;border-color:#F7EDEE}
-.mx-busy button{min-width:120px}
-.mx-busy .mx-time{min-height:16px}
+.mx-span{position:absolute;top:0;bottom:0;background:rgba(193,121,141,.8);border-left:2px solid #F7EDEE;border-right:2px solid #F7EDEE}
+.mx-ph{position:absolute;top:-4px;bottom:-4px;width:2px;margin-left:-1px;background:#F7EDEE;pointer-events:none;z-index:5;box-shadow:0 0 0 1px #000}
+.mx-lanes{max-height:84px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
+.mx-lane{position:relative;height:36px;margin-top:4px;background:rgba(83,57,58,.45)}
+.mx-bar2{position:absolute;top:3px;bottom:3px;background:#53393A;border:1px solid #835965;font-size:11px;letter-spacing:.12em;text-transform:uppercase;line-height:28px;padding:0 18px;overflow:visible;white-space:nowrap}
+.mx-lane.sel .mx-bar2{background:#835965;border-color:#F7EDEE}
+.mx-bar2 i{position:absolute;top:-1px;bottom:-1px;width:14px;background:#C1798D;touch-action:none}.mx-bar2 i.l{left:-1px}.mx-bar2 i.r{right:-1px}
+.mx-bar2 i::before{content:'';position:absolute;top:-4px;bottom:-4px;left:-15px;right:-15px}
+.mx-tools,.mx-grid{display:grid;gap:6px;padding:8px 12px 0}.mx-tools{grid-template-columns:repeat(4,1fr)}.mx-grid{grid-template-columns:repeat(3,1fr)}
+.mx-tools button,.mx-grid button{min-width:0;padding:0 4px;font-size:12px;letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mx-lbl{padding:10px 12px 0;min-height:24px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#C1798D}
+.mx-hold{position:sticky;bottom:0;background:#000;padding:8px 12px 10px;margin-top:auto}
+.mx-mosh{width:100%;min-height:64px!important;font-weight:700;font-size:18px!important;letter-spacing:.3em!important;background:#835965!important;border-color:#835965!important;touch-action:none}
+.mx-mosh.on{background:#C1798D!important;border-color:#C1798D!important;color:#000!important}
+@media (orientation:landscape){.mx-main{flex-direction:row}.mx-side{width:min(380px,46%);max-height:none;border-left:1px solid #53393A}.mx-bar{padding:2px 12px}}
 `;
 
 const $el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -67,7 +81,8 @@ export function mergeSpans(spans) {
 /* fade the edge of a scrolling row that has more to show */
 function fadeCues(row) {
   const f = () => { row.style.setProperty('--ml', row.scrollLeft > 4 ? '22px' : '0px'); row.style.setProperty('--mr', row.scrollLeft + row.clientWidth < row.scrollWidth - 4 ? '22px' : '0px'); };
-  row.addEventListener('scroll', f, { passive: true }); new ResizeObserver(f).observe(row); f();
+  row.addEventListener('scroll', f, { passive: true }); const ro = new ResizeObserver(f); ro.observe(row); f();
+  return ro;
 }
 
 export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, onClose }) {
@@ -80,12 +95,13 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
     pivot: [0.5, 0.5], sel: null, drawing: null, manual: false, spanA: 0, playing: true, vb: null, rev: 0, exporting: false, thumbs: [],
   };
   let raf = 0, closed = false, lastT = -1, lastRender = 0, imgT = 0, imgLast = 0, uid = 1;
-  let maskKey = '', fxKey = '', curMode = null, wasHold = false;
+  let maskKey = '', fxKey = '', curMode = null, wasHold = false, ros = [];
   const cm = $el('canvas'), cf = $el('canvas'); cm.width = cf.width = 320; cm.height = cf.height = 180;
   const api = { state: S };
 
   const close = () => {
     if (closed) return; closed = true; cancelAnimationFrame(raf);
+    ros.forEach((o) => o.disconnect()); ros = [];
     mosh.hold(false); mosh.setMask(null); mosh.setFx(null); mosh.setVideoB(null); mosh.reset();
     viewer.setOptions(saved); [S.el, S.vb].forEach((v) => v && v.pause && v.pause());
     if (S.url) URL.revokeObjectURL(S.url);
@@ -172,7 +188,7 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
   }
 
   // ---------- step 3: editor ----------
-  let disp, dctx, ov, svg, tl, track, tlHost, phEl, laneBox, timeEl, modeRow, fxRow, fxHint, playBtn, moshBtn, stageBox, vxHost, pvEl, delBtn, doneBtn, drawMsg;
+  let disp, dctx, ov, svg, track, tlHost, phEl, laneBox, timeEl, modeRow, fxRow, fxHint, playBtn, moshBtn, stageBox, vxHost, pvEl, addBtn, delBtn, doneBtn, bBtn, fb, drawMsg;
   const media = () => S.el;
   const tNow = () => S.kind === 'video' ? clamp(S.el.currentTime - S.start, 0, S.dur) : imgT;
   const seek = (t) => { t = clamp(t, 0, S.dur - 0.001); if (S.kind === 'video') S.el.currentTime = S.start + t; else imgT = t; lastT = -1; };
@@ -187,22 +203,24 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
     vxHost = $el('div'); pvEl = $el('div', 'mx-pv'); drawMsg = $el('div', 'mx-draw'); ov.append(svg, vxHost, pvEl, drawMsg);
     stageBox.append(disp, ov); stage.appendChild(stageBox);
     timeEl = $el('div', 'mx-time');
+    const tlh = $el('div', 'mx-tlh', '<span>Timeline</span>'); tlh.appendChild(timeEl);
     tlHost = $el('div', 'mx-tl'); track = $el('div', 'mx-track'); const th = $el('div', 'th'); S.thumbs.forEach((c) => { const d = $el('canvas'); d.width = c.width; d.height = c.height; d.getContext('2d').drawImage(c, 0, 0); th.appendChild(d); });
     phEl = $el('div', 'mx-ph'); track.append(th); laneBox = $el('div', 'mx-lanes'); tlHost.append(track, laneBox, phEl);
-    fxHint = $el('div', 'mx-hint'); fxRow = $el('div', 'mx-row'); modeRow = $el('div', 'mx-row');
-    const ctl = $el('div', 'mx-row');
-    playBtn = $el('button', null, 'Pause'); moshBtn = $el('button', 'mx-mosh', 'HOLD TO MOSH');
-    const addBtn = $el('button', null, '+ Region'), bBtn = $el('button', null, 'Video B');
-    delBtn = $el('button', null, 'Delete region'); doneBtn = $el('button', 'on', 'Done'); doneBtn.hidden = true;
-    const fb = $el('input'); fb.type = 'file'; fb.accept = 'video/*'; fb.hidden = true;
-    ctl.append(playBtn, moshBtn);
-    const tools = $el('div', 'mx-row'); tools.append(addBtn, doneBtn, delBtn, bBtn, fb);
-    root.append(bar, stage, timeEl, tlHost, tools, fxHint, fxRow, modeRow, ctl);
-    [tools, fxRow, modeRow].forEach(fadeCues);
+    // one row of tools, then the effect / style choice, then the big HOLD
+    playBtn = $el('button', null, 'Pause'); addBtn = $el('button', null, '+ Region'); doneBtn = $el('button', 'on', 'Done');
+    delBtn = $el('button', null, 'Delete'); bBtn = $el('button', null, 'Video B');
+    fb = $el('input'); fb.type = 'file'; fb.accept = 'video/*'; fb.hidden = true;
+    const tools = $el('div', 'mx-tools'); tools.append(playBtn, addBtn, doneBtn, delBtn, bBtn, fb);
+    fxHint = $el('div', 'mx-lbl'); fxRow = $el('div', 'mx-grid'); modeRow = $el('div', 'mx-row');
+    moshBtn = $el('button', 'mx-mosh', 'Hold to mosh'); const hold = $el('div', 'mx-hold'); hold.appendChild(moshBtn);
+    const side = $el('div', 'mx-side'); side.append(tlh, tlHost, tools, fxHint, fxRow, modeRow, hold);
+    const main = $el('div', 'mx-main'); main.append(stage, side);
+    root.append(bar, main);
+    ros.push(fadeCues(modeRow));
 
     bar.querySelector('[data-x]').onclick = askClose; bar.querySelector('[data-ex]').onclick = doExport;
     playBtn.onclick = () => { setPlaying(!S.playing); };
-    // hold MOSH: paint a red span while pressed
+    // hold MOSH: paint a span while pressed
     const down = (e) => { e.preventDefault(); moshBtn.setPointerCapture && moshBtn.setPointerCapture(e.pointerId); if (S.manual) return; S.manual = true; S.spanA = tNow(); moshBtn.classList.add('on'); if (!S.playing) setPlaying(true); };
     const up = () => { if (!S.manual) return; S.manual = false; moshBtn.classList.remove('on'); S.spans = mergeSpans([...S.spans, { a: S.spanA, b: tNow() }]); drawTl(); };
     moshBtn.onpointerdown = down; moshBtn.onpointerup = moshBtn.onpointercancel = up;
@@ -211,8 +229,9 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
     doneBtn.onclick = closeShape;
     delBtn.onclick = () => { S.regions = S.regions.filter((r) => r.id !== S.sel); S.sel = null; S.rev++; refresh(); };
     bBtn.onclick = () => fb.click();
-    fb.onchange = () => { if (!fb.files[0]) return; if (S.vb) { S.vb.pause(); S.vb.removeAttribute('src'); } if (S.vbUrl) URL.revokeObjectURL(S.vbUrl); const v = $el('video'); v.muted = true; v.loop = true; v.playsInline = true; v.src = S.vbUrl = URL.createObjectURL(fb.files[0]); fb.value = ''; v.play().catch(() => {}); S.vb = v; mosh.setVideoB(v); bBtn.textContent = 'Video B ✓'; };
-    api.setVideoB = (v) => { S.vb = v; mosh.setVideoB(v); };
+    fb.onchange = () => { if (!fb.files[0]) return; if (S.vb) { S.vb.pause(); S.vb.removeAttribute('src'); } if (S.vbUrl) URL.revokeObjectURL(S.vbUrl); const v = $el('video'); v.muted = true; v.loop = true; v.playsInline = true; v.src = S.vbUrl = URL.createObjectURL(fb.files[0]); fb.value = ''; v.play().catch(() => {}); S.vb = v; mosh.setVideoB(v);
+      const r = sel(); if (r) { r.fx = 'videob'; S.rev++; } refresh(); };
+    api.setVideoB = (v) => { S.vb = v; mosh.setVideoB(v); refresh(); };
 
     ov.onpointerdown = (e) => { if (e.target !== ov) return; const [x, y] = ptr(e, ov);
       if (S.drawing) { const f = S.drawing[0]; if (f && S.drawing.length >= 3 && Math.hypot((x - f[0]) * disp.clientWidth, (y - f[1]) * disp.clientHeight) < 28) closeShape(); else S.drawing.push([x, y]); refresh(); return; }
@@ -223,11 +242,11 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
 
     // timeline: drag to scrub; tap on red span deletes it
     let sd = null;
-    track.onpointerdown = (e) => { track.setPointerCapture(e.pointerId); const x = ptr(e, track)[0]; sd = { x0: e.clientX, moved: false, wasPlaying: S.playing };
-      if (!e.target.closest('.mx-span')) { setPlaying(false); seek(x * S.dur); } };
+    track.onpointerdown = (e) => { track.setPointerCapture(e.pointerId); const x = ptr(e, track)[0]; sd = { x0: e.clientX, moved: false, sp: e.target.closest('.mx-span') };
+      if (!sd.sp) { setPlaying(false); seek(x * S.dur); } };
     track.onpointermove = (e) => { if (!sd) return; if (Math.abs(e.clientX - sd.x0) > 6) sd.moved = true; if (sd.moved) { setPlaying(false); seek(ptr(e, track)[0] * S.dur); } };
-    track.onpointerup = (e) => { if (!sd) return; const sp = e.target.closest && e.target.closest('.mx-span');
-      if (sp && !sd.moved) { S.spans.splice(+sp.dataset.i, 1); drawTl(); } sd = null; };
+    track.onpointerup = () => { if (!sd) return; if (sd.sp && !sd.moved) { S.spans.splice(+sd.sp.dataset.i, 1); drawTl(); } sd = null; };
+    track.onpointercancel = () => { sd = null; };
     api.deleteSpan = (i) => { S.spans.splice(i, 1); drawTl(); };
     api.sizeStage = sizeStage; sizeStage();
     refresh(); drawTl();
@@ -239,7 +258,7 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
   function sizeStage() { // output size = clip size capped, used for the preview canvas
     const k = Math.min(1, PREVIEW_SIDE / Math.max(S.w, S.h)), w = Math.round(S.w * k / 2) * 2, h = Math.round(S.h * k / 2) * 2;
     viewer.ensureSize(w, h); disp.width = w; disp.height = h;
-    stageBox.style.aspectRatio = `${w}/${h}`;
+    stageBox.parentNode.style.setProperty('--ar', w / h);
   }
   function setPlaying(p) { S.playing = p; if (playBtn) playBtn.textContent = p ? 'Pause' : 'Play';
     if (S.kind === 'video') { if (p) S.el.play().catch(() => {}); else S.el.pause(); } imgLast = performance.now(); }
@@ -254,30 +273,39 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
     if (!fxRow) return;
     const r = sel();
     fxRow.innerHTML = ''; modeRow.innerHTML = '';
-    fxHint.textContent = r ? '' : S.drawing ? '' : 'Draw a region to pick an effect';
-    delBtn.disabled = !r; doneBtn.hidden = !S.drawing; drawMsg.textContent = S.drawing ? (S.drawing.length >= 3 ? 'Tap the first dot (or Done) to close' : 'Tap to place points, then tap the first dot to close') : '';
-    FX.forEach(([id, name]) => { const b = $el('button', r && r.fx === id ? 'on' : '', name); b.disabled = !r; b.onclick = () => { r.fx = id; if (id === 'mosh') r.mode = S.gmode; S.rev++; refresh(); drawTl(); }; fxRow.appendChild(b); });
+    const idx = r ? S.regions.indexOf(r) + 1 : 0;
+    fxHint.textContent = S.drawing ? 'Drawing a region' : r ? `Region ${idx} effect` : S.vb ? (S.regions.length ? 'Tap a region, then pick Video B' : 'Draw a region, then pick Video B') : 'Mosh style';
+    addBtn.hidden = !!S.drawing; doneBtn.hidden = !S.drawing; delBtn.disabled = !r; bBtn.textContent = S.vb ? 'Video B ✓' : 'Video B';
+    drawMsg.textContent = S.drawing ? (S.drawing.length >= 3 ? 'Tap the first dot or Done to close' : 'Tap to place points') : '';
+    // region effects only once a region is selected; Video B goes first when a clip is loaded
+    fxRow.hidden = !r;
+    if (r) (S.vb ? [FX[5], ...FX.slice(0, 5)] : FX).forEach(([id, name]) => { const b = $el('button', r.fx === id ? 'on' : '', name);
+      b.onclick = () => { if (id === 'videob' && !S.vb) fb.click(); r.fx = id; if (id === 'mosh') r.mode = S.gmode; S.rev++; refresh(); drawTl(); }; fxRow.appendChild(b); });
     const cur = r && r.fx === 'mosh' ? r.mode : S.gmode;
+    modeRow.hidden = !!S.drawing || (r && r.fx !== 'mosh');
     MOSH_MODES.filter((m) => m.n < 12).forEach((m) => { const b = $el('button', m.id === cur ? 'on' : '', m.name);
       b.onclick = () => { if (r && r.fx === 'mosh') { r.mode = m.id; S.rev++; } else S.gmode = m.id; refresh(); }; modeRow.appendChild(b); });
     // overlay
-    const poly = (pts) => pts.map((p) => `${p[0] * 100},${p[1] * 100}`).join(' ');
-    let h = '';
-    S.regions.forEach((g) => { h += `<polygon points="${poly(g.pts)}" fill="rgba(255,59,48,${g.id === S.sel ? .16 : .06})" stroke="#C1798D" stroke-width="2" vector-effect="non-scaling-stroke"/>`; });
-    if (S.drawing && S.drawing.length) h += `<polyline points="${poly(S.drawing)}" fill="none" stroke="#C1798D" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
-    svg.innerHTML = h; vxHost.innerHTML = '';
+    drawPolys(); vxHost.innerHTML = '';
     const pts = S.drawing || (r ? r.pts : []);
     pts.forEach((p, i) => { const d = $el('div', 'mx-vx' + (S.drawing ? (i === 0 && pts.length >= 3 ? ' first' : ' nopt') : '')); d.style.left = p[0] * 100 + '%'; d.style.top = p[1] * 100 + '%';
       if (S.drawing && i === 0 && pts.length >= 3) d.onpointerdown = (e) => { e.stopPropagation(); e.preventDefault(); closeShape(); };
       if (!S.drawing) d.onpointerdown = (e) => { e.stopPropagation(); d.setPointerCapture(e.pointerId);
-        d.onpointermove = (ev) => { const [x, y] = ptr(ev, ov); p[0] = clamp(x, 0, 1); p[1] = clamp(y, 0, 1); S.rev++; refresh(); };
-        d.onpointerup = () => { d.onpointermove = null; }; };
+        d.onpointermove = (ev) => { const [x, y] = ptr(ev, ov); p[0] = clamp(x, 0, 1); p[1] = clamp(y, 0, 1); S.rev++; d.style.left = p[0] * 100 + '%'; d.style.top = p[1] * 100 + '%'; drawPolys(); }; // no refresh(): it would rebuild d and drop the capture
+        d.onpointerup = d.onpointercancel = () => { d.onpointermove = null; }; };
       vxHost.appendChild(d); });
     ov.style.cursor = S.drawing ? 'crosshair' : '';
     pvEl.style.display = PIVOT_MODES.includes(S.gmode) ? '' : 'none'; pvEl.style.left = S.pivot[0] * 100 + '%'; pvEl.style.top = S.pivot[1] * 100 + '%';
     // region polygons are hit-tested by tapping inside them
     ov.onclick = (e) => { if (e.target !== ov || S.drawing) return; const [x, y] = ptr(e, ov); const hit = [...S.regions].reverse().find((g) => inside(g.pts, x, y)); if (hit) { S.sel = hit.id; refresh(); drawTl(); } };
     drawTl();
+  }
+  function drawPolys() {
+    const poly = (pts) => pts.map((p) => `${p[0] * 100},${p[1] * 100}`).join(' ');
+    let h = '';
+    S.regions.forEach((g) => { h += `<polygon points="${poly(g.pts)}" fill="rgba(193,121,141,${g.id === S.sel ? .15 : .07})" stroke="#C1798D" stroke-width="2" vector-effect="non-scaling-stroke"/>`; });
+    if (S.drawing && S.drawing.length) h += `<polyline points="${poly(S.drawing)}" fill="none" stroke="#C1798D" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+    svg.innerHTML = h;
   }
   function inside(pts, x, y) { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; }
 
@@ -287,7 +315,7 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
     if (!track) return;
     track.querySelectorAll('.mx-span').forEach((n) => n.remove());
     S.spans.forEach((s, i) => { const d = $el('div', 'mx-span'); d.dataset.i = i; d.style.left = pc(s.a); d.style.width = ((s.b - s.a) / S.dur * 100) + '%'; track.appendChild(d); });
-    laneBox.innerHTML = '';
+    laneBox.innerHTML = ''; laneBox.hidden = !S.regions.length;
     S.regions.forEach((g, i) => {
       const lane = $el('div', 'mx-lane' + (g.id === S.sel ? ' sel' : '')), bar = $el('div', 'mx-bar2', `${i + 1} ${FX.find((f) => f[0] === g.fx)[1]}`);
       bar.style.left = pc(g.t0); bar.style.width = ((g.t1 - g.t0) / S.dur * 100) + '%';
@@ -295,7 +323,7 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
       lane.onpointerdown = (e) => { S.sel = g.id; const m = e.target === l ? 'l' : e.target === r ? 'r' : null;
         if (!m) { refresh(); return; } lane.setPointerCapture(e.pointerId);
         lane.onpointermove = (ev) => { const t = clamp(ptr(ev, lane)[0] * S.dur, 0, S.dur); if (m === 'l') g.t0 = Math.min(t, g.t1 - 0.2); else g.t1 = Math.max(t, g.t0 + 0.2); S.rev++; bar.style.left = pc(g.t0); bar.style.width = ((g.t1 - g.t0) / S.dur * 100) + '%'; };
-        lane.onpointerup = () => { lane.onpointermove = null; refresh(); }; };
+        lane.onpointerup = lane.onpointercancel = () => { lane.onpointermove = null; refresh(); }; };
     });
   }
 
@@ -339,7 +367,7 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
     const tt = tNow(), fresh = S.kind === 'video' ? tt !== lastRender : now - lastRender > 33 || tt !== lastRender;
     if (fresh || S.manual) { lastRender = tt; if (S.kind === 'video' && S.el.readyState < 2) return; renderFrame(S.el, tt); dctx.drawImage(viewer.canvas, 0, 0, disp.width, disp.height); }
     phEl.style.left = `calc(${(tt / S.dur) * 100}% )`; phEl.style.display = '';
-    timeEl.textContent = `${fmt(tt)} / ${fmt(S.dur)}   spans ${S.spans.length}   regions ${S.regions.length}`;
+    timeEl.textContent = `${fmt(tt)} / ${fmt(S.dur)}`;
   }
 
   // ---------- close with confirm (in-page, window.confirm is blocked in standalone PWAs) ----------

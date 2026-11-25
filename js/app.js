@@ -5,7 +5,7 @@ import { openCamera, openMic, createRecorder, recorderExtension } from './engine
 import { createTiers } from './engine/tiers.js';
 import { WEST_LOOKS } from './west.js';
 
-const VERSION = 'v3.1';
+const VERSION = 'v3.2';
 const FPS = 30;
 const $ = (id) => document.getElementById(id);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -50,20 +50,26 @@ let vhs = null;
 let mosh = null;
 const sourceEl = () => cs.importV || video;
 
-/* ---------- toast ---------- */
+/* ---------- toast: one short line (plus an optional small second), fixed spot above the shutter row ---------- */
 let toastT;
-function toast(m, ms = 3000) {
+const landscape = () => matchMedia('(orientation:landscape) and (max-height:520px)').matches;
+function toast(m, ms = 2000, sub = '') {
   const t = $('toast');
-  t.textContent = m;
+  t.replaceChildren(m);
+  if (sub) { const s = document.createElement('small'); s.textContent = sub; t.append(s); }
+  const land = landscape(), r = (land ? $('stage') : $('row')).getBoundingClientRect();
+  t.style.left = (land ? r.left + r.width / 2 : innerWidth / 2) + 'px';
+  t.style.bottom = (innerHeight - (land ? r.bottom : r.top) + 10) + 'px';
   t.hidden = false;
   clearTimeout(toastT);
   toastT = setTimeout(() => (t.hidden = true), ms);
 }
-// the long hint shows once; after that a short note is enough
+const clearToast = () => { clearTimeout(toastT); $('toast').hidden = true; };
+// the longer hint shows once, as a second small line
 function addedToast() {
   const first = !S.hintRoll;
   if (first) { S.hintRoll = 1; save(); }
-  toast(first ? 'Added to Roll \u2014 open Roll to save to Photos' : 'Added to Roll', first ? 5000 : 2200);
+  toast('Added to Roll', first ? 3200 : 2000, first ? 'Open Roll to save to Photos' : '');
 }
 const NAMES = { green: 'Green', pink: 'Pink' };
 function message(text) {
@@ -88,6 +94,7 @@ function applyLook() {
 function pickLook(id) {
   S.look[cs.tab] = id;
   save();
+  if (cs.tab === 'mosh') paintHud();
   if (cs.tab === 'mosh') { if (mosh) { mosh.setMode(id); mosh.reset(); } } else applyLook();
   buildStrip();
 }
@@ -100,6 +107,7 @@ function setTab(t) {
   viewer.pre = null;
   viewer.post = null;
   leaveImport();
+  clearToast();
   cs.tab = t;
   S.tab = t;
   save();
@@ -123,7 +131,7 @@ function setTab(t) {
   }
   $('plus').hidden = t !== 'mosh';
   $('import').hidden = t !== 'vhs';
-  keyBtn.hidden = t !== 'mosh' || !mosh;
+  $('keyBox').hidden = t !== 'mosh' || !mosh;
   paintKey();
   applyLook();
   buildStrip();
@@ -169,13 +177,30 @@ function buildStrip() {
   fadeCues(box);
 }
 const keyBtn = $('key');
+const KEY_CAP = { off: 'Mosh everything', sky: 'Mosh only the sky', dark: 'Mosh only the darks', motion: 'Mosh only what moves' };
+let keyCapT;
 keyBtn.onclick = () => {
   if (!mosh) return;
   moshKey = { off: 'sky', sky: 'dark', dark: 'motion', motion: 'off' }[moshKey];
   mosh.setKey(moshKey);
   paintKey();
+  const c = $('keyCap');
+  c.textContent = KEY_CAP[moshKey];
+  c.classList.add('show');
+  clearTimeout(keyCapT);
+  keyCapT = setTimeout(() => c.classList.remove('show'), 2500);
 };
-function paintKey() { keyBtn.textContent = 'Key: ' + moshKey; keyBtn.classList.toggle('on', moshKey !== 'off'); }
+function paintKey() { keyBtn.textContent = 'KEY: ' + moshKey.toUpperCase(); keyBtn.classList.toggle('on', moshKey !== 'off'); }
+/* persistent state label over the picture on MOSH: idle hint, or the recording state */
+function paintHud() {
+  const h = $('hud'), show = moshVideo() && !!mosh;
+  h.hidden = !show;
+  if (!show) return;
+  const on = !!cs.rec || !!hold;
+  h.classList.toggle('on', on);
+  const m = (mosh.modes.find((x) => x.id === S.look.mosh) || { name: '' }).name.toUpperCase();
+  $('hudTxt').textContent = on ? (cs.locked ? 'MOSHING \u00b7 TAP SHUTTER TO STOP' : 'MOSHING') : `HOLD TO MOSH \u2014 ${m}`;
+}
 /* soft fade on the side(s) of a scrolling strip that still has more to show */
 function fadeCues(box) {
   const f = () => {
@@ -360,7 +385,10 @@ document.querySelectorAll('#zoom button').forEach((b) => (b.onclick = async () =
 
 async function ensureMic() {
   if (cs.mic && cs.mic.getAudioTracks().some((t) => t.readyState === 'live')) return cs.mic;
-  try { cs.mic = await openMic(); } catch { cs.mic = null; toast('No microphone access. Recording without sound.'); }
+  try {
+    cs.mic = await openMic();
+    if (!cs.open) { closeMic(); return null; } // the app was backgrounded while the permission/stream was opening
+  } catch { cs.mic = null; toast('No microphone access. Recording without sound.'); }
   return cs.mic;
 }
 function closeMic() {
@@ -397,7 +425,6 @@ function leaveImport() {
   if (cs.impAc) cs.impAc.close().catch(() => {});
   cs.impAc = null; cs.importV = null; cs.srcKey = '';
   $('import').textContent = 'Import';
-  $('tc').classList.remove('imp');
 }
 $('import').onclick = async () => {
   if (cs.rec) return;
@@ -498,6 +525,7 @@ async function stopRec() {
   let blob = null;
   try { blob = await r.rec.stop(); } catch { /* empty clip below */ }
   r.tracks.forEach((t) => t.stop());
+  if (vhs) vhs.stopTape();
   cs.srcKey = ''; // sizes were frozen while recording
   if (!blob || !blob.size) { toast('That clip came back empty.'); return null; }
   const mime = r.rec.mime.split(';')[0];
@@ -532,6 +560,7 @@ function paintShutter() {
   ['flip', 'gear', 'plus', 'import'].forEach((id) => ($(id).disabled = live));
   document.querySelectorAll('#tabs button, #mode button').forEach((b) => (b.disabled = live));
   document.querySelectorAll('#mode button').forEach((b) => b.classList.toggle('on', b.dataset.m === cs.mode));
+  paintHud();
   sh.setAttribute('aria-label', live ? 'Stop recording' : cs.mode === 'video' ? 'Start recording' : 'Take a photo');
 }
 
@@ -564,7 +593,7 @@ const release = async () => {
   const ok = await h.p;
   if (!ok) { if (mosh) mosh.hold(false); paintShutter(); return; }
   if (performance.now() - h.t > 250) finishMosh();
-  else { cs.locked = true; toast('Locked on. Tap to stop.'); }
+  else { cs.locked = true; paintHud(); }
 };
 $('shutter').addEventListener('pointerup', release);
 $('shutter').addEventListener('pointercancel', release);
@@ -593,16 +622,21 @@ function closeReview() {
   if (reviewUrl) URL.revokeObjectURL(reviewUrl);
   reviewUrl = null; reviewClip = null;
 }
-$('reviewTrash').onclick = closeReview;
+// a clip that is already in the roll (editor export) carries its item: Trash removes it again, Save shares it
+$('reviewTrash').onclick = () => {
+  const c = reviewClip;
+  closeReview();
+  if (c && c.item) { delete c.item._blob; removeItems([c.item]); }
+};
 $('reviewSave').onclick = () => {
   const c = reviewClip;
   if (!c) return;
-  const it = newItem(c.blob, c.name, c.thumb);
-  const added = addToRoll(it);  // starts the IDB write
+  const it = c.item || newItem(c.blob, c.name, c.thumb);
+  const added = c.item ? null : addToRoll(it); // starts the IDB write
   const shared = shareItems([it]); // navigator.share runs now, still inside the tap
   closeReview();
-  addedToast();
-  Promise.all([added, shared]).catch(() => {});
+  if (!c.item) addedToast();
+  Promise.all([added, shared]).catch(() => {}).finally(() => { delete it._blob; });
 };
 
 /* ---------- roll (IndexedDB) ---------- */
@@ -705,17 +739,19 @@ function drawRoll() {
     const b = document.createElement('button');
     b.style.backgroundImage = `url(${it.thumb})`;
     b.setAttribute('aria-label', it.name);
-    if (fileType(it).startsWith('video')) { const i = document.createElement('i'); i.textContent = '▶ VIDEO'; b.append(i); }
-    if (it.saved) { const s = document.createElement('em'); s.textContent = '✓'; b.append(s); }
+    const i = document.createElement('i'); i.textContent = fileType(it).startsWith('video') ? '▶ VIDEO' : 'PHOTO'; b.append(i);
+    if (it.saved) { const s = document.createElement('em'); s.textContent = 'SAVED'; b.append(s); }
     if (selecting) { b.append(document.createElement('u')); if (picked.has(it)) b.classList.add('sel'); }
     b.onclick = () => { if (!selecting) return openViewer(it); picked.has(it) ? picked.delete(it) : picked.add(it); drawRoll(); };
     grid.append(b);
   });
   $('rollSel').textContent = selecting ? 'Cancel' : 'Select';
   $('rollSel').disabled = !roll.length;
-  $('rollSave').textContent = selecting ? `Save (${picked.size})` : 'Save all';
+  const unsaved = roll.filter((i) => !i.saved).length;
+  $('rollSave').textContent = selecting ? `Save (${picked.size})` : unsaved ? 'Save all' : 'All saved';
   $('rollDel').textContent = selecting ? `Delete (${picked.size})` : 'Clear roll';
-  $('rollSave').disabled = $('rollDel').disabled = selecting ? !picked.size : !roll.length;
+  $('rollSave').disabled = selecting ? !picked.size : !unsaved;
+  $('rollDel').disabled = selecting ? !picked.size : !roll.length;
 }
 async function removeItems(items) {
   const set = new Set(items);
@@ -726,7 +762,7 @@ async function removeItems(items) {
 $('roll').onclick = () => { selecting = false; picked.clear(); drawRoll(); $('rollSheet').hidden = false; };
 $('rollSel').onclick = () => { selecting = !selecting; picked.clear(); drawRoll(); };
 $('rollSave').onclick = async () => {
-  const items = selecting ? [...picked] : roll.filter((i) => !i.saved).length ? roll.filter((i) => !i.saved) : roll;
+  const items = selecting ? [...picked] : roll.filter((i) => !i.saved); // Save all skips what is already saved
   if (await shareItems(items)) { selecting = false; picked.clear(); }
   drawRoll();
 };
@@ -744,8 +780,10 @@ async function openViewer(it) {
   el.src = viewUrl;
   if (el.tagName === 'VIDEO') { el.controls = true; el.playsInline = true; el.loop = true; el.autoplay = true; el.play().catch(() => {}); }
   $('viewMedia').replaceChildren(el);
+  paintViewSave();
   $('viewer').hidden = false;
 }
+function paintViewSave() { $('viewSave').textContent = viewing && viewing.saved ? 'Saved' : 'Save'; }
 function closeViewer() {
   $('viewer').hidden = true;
   const v = $('viewMedia').querySelector('video');
@@ -755,7 +793,7 @@ function closeViewer() {
   if (viewing) delete viewing._blob;
   viewUrl = null; viewing = null;
 }
-$('viewSave').onclick = async () => { if (viewing && (await shareItems([viewing])) && !$('rollSheet').hidden) drawRoll(); };
+$('viewSave').onclick = async () => { if (viewing && (await shareItems([viewing]))) { paintViewSave(); if (!$('rollSheet').hidden) drawRoll(); } };
 $('viewDel').onclick = () => armConfirm($('viewDel'), async () => { const it = viewing; closeViewer(); await removeItems([it]); if (!$('rollSheet').hidden) drawRoll(); });
 const closeSheet = (sh) => { if (sh.id === 'viewer') closeViewer(); else sh.hidden = true; };
 document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => closeSheet(b.closest('.sheet'))));
@@ -763,35 +801,52 @@ document.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => clos
 document.querySelectorAll('.sheet').forEach((sh) => { if (sh.id !== 'review') sh.addEventListener('click', (e) => { if (e.target === sh) closeSheet(sh); }); });
 
 /* ---------- settings ---------- */
-function paintTier() { const t = tiers.current(); $('s-tier').textContent = `${tiers.choice === 'auto' ? 'Auto' : t.name} · ${t.note.split(' · ')[0]}`; }
-['codec', 'westRatio', 'vhsRatio', 'tape', 'shake'].forEach((k) => {
+function paintTier() {
+  const t = tiers.current(), auto = tiers.choice === 'auto';
+  $('s-tier').textContent = `${auto ? 'Auto' : t.name} \u00b7 ${t.note.split(' \u00b7 ')[0]}`;
+  $('s-tierNote').textContent = (auto ? 'Auto picks what this phone can hold at 30 fps. ' : `${t.note.split(' \u00b7 ')[1] || ''}. `) + 'Tap to change.';
+}
+const segs = () => document.querySelectorAll('.seg');
+const paintSegs = () => segs().forEach((g) => g.querySelectorAll('button').forEach((b) => b.classList.toggle('on', S[g.dataset.k] === b.dataset.v)));
+segs().forEach((g) => g.querySelectorAll('button').forEach((b) => (b.onclick = () => { S[g.dataset.k] = b.dataset.v; save(); cs.srcKey = ''; paintSegs(); })));
+['tape', 'shake'].forEach((k) => {
   const el = $('s-' + k);
-  if (el.type === 'checkbox') el.checked = !!S[k]; else el.value = S[k];
-  el.onchange = () => {
-    S[k] = el.type === 'checkbox' ? el.checked : el.value;
-    save();
-    if (k === 'shake') enableMotion();
-    cs.srcKey = '';
-  };
+  el.checked = !!S[k];
+  el.onchange = () => { S[k] = el.checked; save(); if (k === 'shake') enableMotion(); };
 });
 $('s-tier').onclick = () => { if (cs.rec) return; tiers.next(); paintTier(); startCam(); };
-$('gear').onclick = () => { paintTier(); $('settings').hidden = false; };
+$('gear').onclick = () => { paintTier(); paintSegs(); $('settings').hidden = false; };
 $('ver').textContent = VERSION;
 
 /* ---------- wiring ---------- */
 document.querySelectorAll('#tabs button').forEach((b) => (b.onclick = () => setTab(b.dataset.t)));
 document.querySelectorAll('#mode button').forEach((b) => (b.onclick = () => { cs.mode = b.dataset.m; S.video = cs.mode === 'video'; save(); paintShutter(); }));
 $('flip').onclick = () => { if (cs.rec) return; cs.facing = cs.facing === 'environment' ? 'user' : 'environment'; startCam(); };
+function editorSaved(blob, name) { // into the roll, then the same review sheet as hold-to-mosh
+  const it = newItem(blob, name || `mosh-${stamp()}.mp4`);
+  it._blob = blob;
+  addToRoll(it);
+  openReview({ blob, name: it.name, thumb: it.thumb, item: it });
+}
 $('plus').onclick = () => {
   if (!mods.editor || !mosh) return toast('The mosh editor is not available in this build.');
   mosh.hold(false);
-  mods.editor.openMoshEditor($('editorRoot'), { viewer, mosh, createRecorder, onSaved: (blob, name) => { addToRoll(blob, name || `mosh-${stamp()}.mp4`); addedToast(); }, onClose: () => syncFrame() });
+  mods.editor.openMoshEditor($('editorRoot'), { viewer, mosh, createRecorder, onSaved: editorSaved, onClose: () => syncFrame() });
 };
 // tap/drag on the picture moves the mosh pivot
 function pivotFrom(e) {
   const r = canvas.getBoundingClientRect();
   if (mosh) mosh.setPivot(clamp((e.clientX - r.left) / r.width, 0, 1), clamp((e.clientY - r.top) / r.height, 0, 1));
+  if (['bloom', 'radial', 'swirl'].includes(S.look.mosh)) { // the modes that centre on the pivot
+    const sr = $('stage').getBoundingClientRect(), g = $('ring');
+    g.style.left = e.clientX - sr.left + 'px'; g.style.top = e.clientY - sr.top + 'px';
+    g.classList.add('show');
+    clearTimeout(ringT);
+    ringT = setTimeout(() => g.classList.remove('show'), 1200);
+  }
 }
+let ringT;
+$('stage').addEventListener('gesturestart', (e) => e.preventDefault()); // pinch belongs to the picture, not the page
 /* one finger on the picture moves the mosh pivot; two fingers pinch-zoom (hardware if the camera has it, else digital) */
 const ZMAX = 3, ptrs = new Map();
 let pinch = null, zrT = 0, zAt = 0;
@@ -854,7 +909,7 @@ document.addEventListener('visibilitychange', async () => {
 });
 addEventListener('pagehide', () => { suspendApp(); });
 
-window.bekfaye = { viewer, cs, S, step: (t) => step(t), startRec, stopAndKeep, takePhoto, roll: () => roll };
+window.bekfaye = { viewer, cs, S, step: (t) => step(t), startRec, stopAndKeep, editorSaved, takePhoto, roll: () => roll };
 
 (async () => {
   if (!viewer.ok) message('This browser has no WebGL2, so the look cannot be drawn.');
