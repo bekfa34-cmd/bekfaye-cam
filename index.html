@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bek. Faye">
-<meta name="theme-color" content="#0c0b0d">
+<meta name="theme-color" content="#53393A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-180.png">
@@ -17,12 +17,13 @@
 <body>
 <div id="app" data-tab="west">
   <header id="top">
+    <b id="mark">bek. faye</b>
     <nav id="tabs" aria-label="Mode">
       <button data-t="west" class="on">WEST</button>
       <button data-t="vhs">VHS</button>
       <button data-t="mosh">MOSH</button>
     </nav>
-    <button id="gear" aria-label="Settings">&#9881;&#xFE0E;</button>
+    <button id="gear" aria-label="Settings">SET</button>
   </header>
 
   <div id="tc"><i class="rec"></i><span id="tcTime">00:00:00:00</span><span id="tcInfo"></span></div>
@@ -66,13 +67,9 @@
       <label class="r"><span>Codec</span><select id="s-codec"><option value="auto">Auto</option><option value="hevc">HEVC</option><option value="h264">H.264</option></select></label>
       <label class="r"><span>WEST shape</span><select id="s-westRatio"><option value="full">Full</option><option value="4:3">4:3</option><option value="16:9">16:9</option><option value="1:1">1:1</option></select></label>
       <label class="r"><span>VHS shape</span><select id="s-vhsRatio"><option value="4:3">Standard 3:4</option><option value="16:9">Tall 9:16</option></select></label>
-      <label class="r"><span>VHS date stamp</span><select id="s-stampMode"><option value="off">Off</option><option value="now">Now</option><option value="custom">Custom date</option></select></label>
-      <label class="r" id="r-custom"><span>Stamp date</span><input type="datetime-local" id="s-customDate"></label>
-      <label class="r"><span>Stamp style</span><select id="s-stampStyle"><option value="classic">Classic</option><option value="tall">Tall</option><option value="alt">Alt</option></select></label>
-      <label class="r"><span>Stamp on right</span><input type="checkbox" id="s-stampRight"></label>
       <label class="r"><span>Tape sound (VHS)</span><input type="checkbox" id="s-tape"></label>
       <label class="r"><span>Shake adds tracking noise</span><input type="checkbox" id="s-shake"></label>
-      <p class="foot" id="ver"></p>
+      <p class="foot"><b>bek. faye</b><br><span id="ver"></span></p>
     </div>
   </div>
 </div>

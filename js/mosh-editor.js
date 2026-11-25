@@ -13,41 +13,41 @@ const PIVOT_MODES = ['bloom', 'radial', 'swirl'];
 const RGB = { grey: '#f00', colour: '#0f0', mirror: '#00f' };
 
 const CSS = `
-.mx{position:fixed;inset:0;z-index:300;background:#0b0b0c;color:#fff;font:15px/1.3 -apple-system,system-ui,sans-serif;display:flex;flex-direction:column;
+.mx{position:fixed;inset:0;z-index:300;background:#000;color:#F7EDEE;font:15px/1.3 'Babel Sans',system-ui,sans-serif;display:flex;flex-direction:column;
  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);user-select:none;-webkit-user-select:none;touch-action:manipulation}
-.mx *{box-sizing:border-box}.mx button{font:inherit;color:#fff;background:#262628;border:0;border-radius:12px;min-height:44px;min-width:44px;padding:0 14px}
-.mx button:active{background:#3a3a3d}.mx button.on{background:#ff3b30}.mx button[disabled]{opacity:.35}
-.mx-bar{display:flex;align-items:center;gap:8px;padding:8px 12px}.mx-bar .sp{flex:1}.mx-title{font-weight:600;text-align:center;flex:1}
+.mx *{box-sizing:border-box}.mx button{font:inherit;color:#F7EDEE;background:#53393A;border:1px solid #835965;border-radius:0;text-transform:uppercase;letter-spacing:.12em;font-size:13px;min-height:44px;min-width:44px;padding:0 14px}
+.mx button:active{background:#835965}.mx button.on{background:#C1798D;color:#000;border-color:#C1798D}.mx button[disabled]{opacity:.35}
+.mx-title{text-transform:uppercase;letter-spacing:.25em;font-size:13px}.mx-bar{display:flex;align-items:center;gap:8px;padding:8px 12px}.mx-bar .sp{flex:1}.mx-title{font-weight:600;text-align:center;flex:1}
 .mx-center{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:stretch;gap:14px;padding:24px}
 .mx-center button{min-height:60px;font-size:17px}
 .mx-stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;background:#000;touch-action:none}
 .mx-stage .box{position:relative;max-width:100%;max-height:100%}
 .mx-stage canvas,.mx-stage video{display:block;max-width:100%;max-height:100%}
 .mx-ov{position:absolute;inset:0;width:100%;height:100%}.mx-ov svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.mx-vx{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:#ff3b30;border:3px solid #fff;touch-action:none}
-.mx-pv{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border:2px solid #fff;border-radius:50%;pointer-events:none;box-shadow:0 0 0 1px #000}
-.mx-strip{position:relative;height:56px;margin:6px 14px;border-radius:8px;background:#222;overflow:hidden;touch-action:none}
+.mx-vx{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:0;background:#C1798D;border:2px solid #F7EDEE;touch-action:none}
+.mx-pv{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border:2px solid #F7EDEE;border-radius:0;pointer-events:none;box-shadow:0 0 0 1px #000}
+.mx-strip{position:relative;height:56px;margin:6px 14px;border-radius:0;background:#1a0f10;overflow:hidden;touch-action:none}
 .mx-strip .th{position:absolute;inset:0;display:flex}.mx-strip .th canvas{flex:1;min-width:0;height:100%;object-fit:cover}
-.mx-win{position:absolute;top:0;bottom:0;border:3px solid #ffd60a;border-radius:6px;background:rgba(255,214,10,.12)}
-.mx-win i{position:absolute;top:0;bottom:0;width:22px;background:#ffd60a}.mx-win i.l{left:-3px}.mx-win i.r{right:-3px}
+.mx-win{position:absolute;top:0;bottom:0;border:3px solid #F7EDEE;border-radius:0;background:rgba(247,237,238,.12)}
+.mx-win i{position:absolute;top:0;bottom:0;width:22px;background:#F7EDEE}.mx-win i.l{left:-3px}.mx-win i.r{right:-3px}
 .mx-tl{margin:4px 14px;position:relative;touch-action:none;height:152px}
 .mx-lanes{height:104px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y}
-.mx-track{position:relative;height:44px;border-radius:8px;background:#2a2a2c;overflow:hidden}
+.mx-track{position:relative;height:44px;border-radius:0;background:#53393A;overflow:hidden}
 .mx-track .th{position:absolute;inset:0;display:flex;opacity:.55}.mx-track .th canvas{flex:1;min-width:0;height:100%}
-.mx-span{position:absolute;top:0;bottom:0;background:rgba(255,59,48,.8);border-left:2px solid #fff;border-right:2px solid #fff}
-.mx-ph{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1.5px;background:#fff;pointer-events:none;z-index:5}
-.mx-lane{position:relative;height:30px;margin-top:4px;border-radius:6px;background:#1c1c1e}
-.mx-bar2{position:absolute;top:2px;bottom:2px;border-radius:5px;background:#5a5a5e;font-size:11px;line-height:26px;padding-left:22px;overflow:hidden;white-space:nowrap}
-.mx-lane.sel .mx-bar2{background:#ff3b30}.mx-bar2 i{position:absolute;top:0;bottom:0;width:20px;background:rgba(255,255,255,.55);touch-action:none}.mx-bar2 i.l{left:0}.mx-bar2 i.r{right:0}
+.mx-span{position:absolute;top:0;bottom:0;background:rgba(193,121,141,.8);border-left:2px solid #fff;border-right:2px solid #fff}
+.mx-ph{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1.5px;background:#F7EDEE;pointer-events:none;z-index:5}
+.mx-lane{position:relative;height:30px;margin-top:4px;border-radius:0;background:#2a1c1d}
+.mx-bar2{position:absolute;top:2px;bottom:2px;border-radius:0;background:#835965;font-size:11px;line-height:26px;padding-left:22px;overflow:hidden;white-space:nowrap}
+.mx-lane.sel .mx-bar2{background:#C1798D}.mx-bar2 i{position:absolute;top:0;bottom:0;width:20px;background:rgba(255,255,255,.55);touch-action:none}.mx-bar2 i.l{left:0}.mx-bar2 i.r{right:0}
 .mx-row{display:flex;gap:8px;padding:6px 12px;overflow-x:auto;-webkit-overflow-scrolling:touch;--ml:0px;--mr:0px;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--ml),#000 calc(100% - var(--mr)),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 var(--ml),#000 calc(100% - var(--mr)),transparent 100%)}.mx-row button{flex:none;min-height:40px;font-size:13px;padding:0 12px}
-.mx-mosh{flex:1;min-height:64px!important;font-weight:700;font-size:18px;letter-spacing:1px;background:#7a1510!important;touch-action:none}
-.mx-mosh.on{background:#ff3b30!important}
+.mx-mosh{flex:1;min-height:64px!important;font-weight:700;font-size:18px;letter-spacing:.25em;background:#835965!important;touch-action:none}
+.mx-mosh.on{background:#C1798D!important}
 .mx-busy{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;z-index:9;font-size:17px}
-.mx-time{font:12px ui-monospace,monospace;color:#aaa;text-align:center;padding:2px}
-.mx-hint{height:20px;font-size:13px;color:#ffd60a;text-align:center;padding:0 12px}
+.mx-time{font:12px ui-monospace,monospace;color:#C1798D;text-align:center;padding:2px}
+.mx-hint{height:20px;font-size:13px;color:#F7EDEE;text-align:center;padding:0 12px}
 .mx-stage .mx-draw{position:absolute;left:0;right:0;top:8px;text-align:center;font-size:13px;pointer-events:none;text-shadow:0 1px 4px #000}
 .mx-vx.nopt{pointer-events:none;width:22px;height:22px;margin:-11px 0 0 -11px;opacity:.8}
-.mx-vx.first{width:40px;height:40px;margin:-20px 0 0 -20px;background:#ffd60a;border-color:#fff}
+.mx-vx.first{width:40px;height:40px;margin:-20px 0 0 -20px;background:#F7EDEE;border-color:#F7EDEE}
 .mx-busy button{min-width:120px}
 .mx-busy .mx-time{min-height:16px}
 `;
@@ -263,8 +263,8 @@ export function openMoshEditor(rootEl, { viewer, mosh, createRecorder, onSaved, 
     // overlay
     const poly = (pts) => pts.map((p) => `${p[0] * 100},${p[1] * 100}`).join(' ');
     let h = '';
-    S.regions.forEach((g) => { h += `<polygon points="${poly(g.pts)}" fill="rgba(255,59,48,${g.id === S.sel ? .16 : .06})" stroke="#ff3b30" stroke-width="2" vector-effect="non-scaling-stroke"/>`; });
-    if (S.drawing && S.drawing.length) h += `<polyline points="${poly(S.drawing)}" fill="none" stroke="#ff3b30" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+    S.regions.forEach((g) => { h += `<polygon points="${poly(g.pts)}" fill="rgba(255,59,48,${g.id === S.sel ? .16 : .06})" stroke="#C1798D" stroke-width="2" vector-effect="non-scaling-stroke"/>`; });
+    if (S.drawing && S.drawing.length) h += `<polyline points="${poly(S.drawing)}" fill="none" stroke="#C1798D" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
     svg.innerHTML = h; vxHost.innerHTML = '';
     const pts = S.drawing || (r ? r.pts : []);
     pts.forEach((p, i) => { const d = $el('div', 'mx-vx' + (S.drawing ? (i === 0 && pts.length >= 3 ? ' first' : ' nopt') : '')); d.style.left = p[0] * 100 + '%'; d.style.top = p[1] * 100 + '%';

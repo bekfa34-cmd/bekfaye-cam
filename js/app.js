@@ -5,7 +5,7 @@ import { openCamera, openMic, createRecorder, recorderExtension } from './engine
 import { createTiers } from './engine/tiers.js';
 import { WEST_LOOKS } from './west.js';
 
-const VERSION = 'v3.0';
+const VERSION = 'v3.1';
 const FPS = 30;
 const $ = (id) => document.getElementById(id);
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -20,8 +20,7 @@ const BASE = {
 };
 const DEF = {
   tab: 'west', video: true, look: { west: 'main', vhs: 'truevhs', mosh: 'smear' }, codec: 'auto',
-  westRatio: 'full', vhsRatio: '4:3', stampMode: 'now', stampStyle: 'classic', stampRight: false,
-  customDate: '1998-11-24T19:17', tape: true, shake: true,
+  westRatio: 'full', vhsRatio: '4:3', tape: true, shake: true,
 };
 const S = JSON.parse(JSON.stringify(DEF));
 try {
@@ -94,12 +93,6 @@ function pickLook(id) {
 }
 
 /* ---------- tabs ---------- */
-function applyStamp() {
-  if (!vhs) return;
-  const d = S.stampMode === 'custom' ? new Date(S.customDate) : new Date();
-  vhs.setStamp({ mode: S.stampMode, date: isNaN(d) ? new Date() : d, style: S.stampStyle, right: !!S.stampRight });
-}
-
 function setTab(t) {
   if (cs.rec || cs.starting) return;
   if (vhs) vhs.detach();
@@ -118,7 +111,6 @@ function setTab(t) {
     else {
       if (!vhs) vhs = mods.vhs.createVhs(viewer, { toast, settings: S, isRecording: () => !!cs.rec });
       vhs.attach();
-      applyStamp();
     }
   } else if (t === 'mosh') {
     if (!mods.mosh) toast('MOSH is not available in this build.');
@@ -476,7 +468,6 @@ async function startRec() {
     draw();
     const rec = createRecorder(canvas, { fps: FPS, audioStream: audio, prefer: S.codec });
     cs.rec = { rec, tracks, start: performance.now(), thumb: smallThumb() };
-    if (vhs && cs.tab === 'vhs') vhs.setRecording(true, new Date());
     cs.timer = setInterval(() => ($('tcTime').textContent = timecode(performance.now() - cs.rec.start)), 1000 / FPS);
     if (cs.importV) {
       const v = cs.importV;
@@ -502,7 +493,6 @@ async function stopRec() {
   if (!r) return null;
   cs.rec = null;
   clearInterval(cs.timer);
-  if (vhs && cs.tab === 'vhs') vhs.setRecording(false);
   if (cs.importV) cs.importV.pause();
   paintShutter();
   let blob = null;
@@ -774,22 +764,19 @@ document.querySelectorAll('.sheet').forEach((sh) => { if (sh.id !== 'review') sh
 
 /* ---------- settings ---------- */
 function paintTier() { const t = tiers.current(); $('s-tier').textContent = `${tiers.choice === 'auto' ? 'Auto' : t.name} · ${t.note.split(' · ')[0]}`; }
-['codec', 'westRatio', 'vhsRatio', 'stampMode', 'stampStyle', 'customDate', 'stampRight', 'tape', 'shake'].forEach((k) => {
+['codec', 'westRatio', 'vhsRatio', 'tape', 'shake'].forEach((k) => {
   const el = $('s-' + k);
   if (el.type === 'checkbox') el.checked = !!S[k]; else el.value = S[k];
   el.onchange = () => {
     S[k] = el.type === 'checkbox' ? el.checked : el.value;
     save();
     if (k === 'shake') enableMotion();
-    applyStamp();
     cs.srcKey = '';
-    $('r-custom').hidden = S.stampMode !== 'custom';
   };
 });
-$('r-custom').hidden = S.stampMode !== 'custom';
 $('s-tier').onclick = () => { if (cs.rec) return; tiers.next(); paintTier(); startCam(); };
 $('gear').onclick = () => { paintTier(); $('settings').hidden = false; };
-$('ver').textContent = 'Bek. Faye ' + VERSION;
+$('ver').textContent = VERSION;
 
 /* ---------- wiring ---------- */
 document.querySelectorAll('#tabs button').forEach((b) => (b.onclick = () => setTab(b.dataset.t)));
